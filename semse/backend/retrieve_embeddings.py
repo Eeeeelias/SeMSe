@@ -96,7 +96,7 @@ def retrieve_media(path, table_name) -> (dict, dict):
 
     num_langs = len(set([subtitles[key]['language'] for key in subtitles.keys()]))
     print(f"Found {len(descriptions)} descriptions and {len(subtitles)} conversations "
-          f"in {num_langs} language(s) for {show_title}", end=" ")
+          f"in {num_langs} language(s)", end=" ")
     # add descriptions to db
     desc_embeddigns = {idx: {'title': show_title, 'episode_id': descriptions[key]['episode_id'],
                              'plain_text': descriptions[key]['description'],

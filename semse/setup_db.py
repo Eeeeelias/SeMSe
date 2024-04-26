@@ -43,9 +43,9 @@ def fill_database():
         c = 0
         for show in dirs:
             c += 1
-            print(f"[{c}/{len(dirs)}]", end=" ")
+            print(f"[{c}/{len(dirs)}] {show}:", end=" ")
             if show in existing_media:
-                print(f"Media {show} already in database")
+                print(f"already in database")
                 continue
 
             media_path = os.path.join(f"/media/{dir_type}", show)
