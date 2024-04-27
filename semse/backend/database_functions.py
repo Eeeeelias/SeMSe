@@ -125,7 +125,7 @@ def insert_into_table(conn, table_name, table_type, data):
     conn.commit()
 
 
-def query_description(conn, query: np.ndarray, show: str = None, table: str = None):
+def query_description(conn, query: np.ndarray, show: str = None, table: str = None, limit: int = 5):
     if not table:
         return ["No table specified"]
     # table is either TVShows, Animes, or Movies
@@ -138,14 +138,14 @@ def query_description(conn, query: np.ndarray, show: str = None, table: str = No
             JOIN Descriptions AS d ON t.{id_name} = d.{id_name}
             {where_title}
             ORDER BY d.Embedding <=> %s
-            LIMIT 5
+            LIMIT {limit}
             """
     with conn.cursor() as cursor:
         cursor.execute(sql_string, (str_embedding,))
         return cursor.fetchall()
 
 
-def query_subtitle(conn, query: np.ndarray, show: str = None, table: str = None, language: str = None):
+def query_subtitle(conn, query: np.ndarray, show: str = None, table: str = None, language: str = None, limit: int = 5):
     if not table:
         return ["No table specified"]
     str_embedding = "[" + ",".join(map(str, query)) + "]"
@@ -160,7 +160,7 @@ def query_subtitle(conn, query: np.ndarray, show: str = None, table: str = None,
             {where_title}
             {lang}
             ORDER BY d.Embedding <=> %s
-            LIMIT 5
+            LIMIT {limit}
             """
     with conn.cursor() as cursor:
         cursor.execute(sql_string, (str_embedding,))

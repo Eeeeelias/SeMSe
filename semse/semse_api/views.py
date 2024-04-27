@@ -25,6 +25,10 @@ def query_media(request):
         # return 400 bad request
         return JsonResponse({'error': 'No query provided'}, status=400)
     try:
+        table = data['table']
+    except KeyError:
+        return JsonResponse({'error': 'No table provided'}, status=400)
+    try:
         show = data['show']
     except KeyError:
         show = None
@@ -33,8 +37,8 @@ def query_media(request):
     except KeyError:
         type = "both"
 
-    print("Finding media with query: " + query, "show: " + str(show))
-    query_result = uq.query_db(query, show, table=data['table'], language=data['language'], type=type)
+    print("Finding media with query: " + query, "show: " + str(show), "table: " + table, "type: " + type)
+    query_result = uq.query_db(query, show, table=table, language=data['language'], type=type)
     return JsonResponse(query_result)
 
 
