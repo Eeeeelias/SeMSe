@@ -1,6 +1,6 @@
 from django.http import JsonResponse, HttpResponse
 from django.shortcuts import render, redirect
-from django.views.decorators.csrf import csrf_exempt, csrf_protect
+from django.views.decorators.csrf import ensure_csrf_cookie
 import backend.database_functions as dbf
 import backend.user_query as uq
 
@@ -28,11 +28,17 @@ def query_media(request):
         show = data['show']
     except KeyError:
         show = None
+    try:
+        type = data['type']
+    except KeyError:
+        type = "both"
+
     print("Finding media with query: " + query, "show: " + str(show))
-    query_result = uq.query_db(query, show, table=data['table'], language=data['language'])
+    query_result = uq.query_db(query, show, table=data['table'], language=data['language'], type=type)
     return JsonResponse(query_result)
 
 
+@ensure_csrf_cookie
 def test_api(request):
     # write html with form to test api
     html = """
@@ -43,6 +49,7 @@ def test_api(request):
         Show: <input type="text" name="show"><br>
         Table: <input type="text" name="table"><br>
         Language: <input type="text" name="language"><br>
+        Type: <input type="text" name="type"><br>
         <input type="submit" value="Submit">
     </form>
     <br>
@@ -98,3 +105,9 @@ def test_api(request):
     </html>
     """
     return HttpResponse(html)
+
+
+def get_media_size(request):
+    print("Got request for media size")
+    conn = dbf.get_conn()
+    return JsonResponse(dbf.size_of_db(conn))

@@ -2,9 +2,8 @@ version: "3"
 services:
     pgvecto-rs:
         container_name: semantic_search_db
-        environment:
-            - POSTGRES_USER=postgres
-            - POSTGRES_PASSWORD=secret
+        env_file:
+            -   .env
         volumes:
             - ./db:/var/lib/postgresql/data
         networks:
@@ -13,16 +12,14 @@ services:
 
     semse-api:
         build: ./semse
-        command: > #             python setup_db.py &&
+        command: >
             bash -c "
             python setup_db.py &
             gunicorn semse.wsgi:application --bind 0.0.0.0:8000 --workers 4 --timeout 120
             "
         container_name: semse-api
-        environment:
-            - POSTGRES_USER=postgres
-            - POSTGRES_PASSWORD=secret
-            - WANTED_LANGUAGES=en,de
+        env_file:
+            - .env
         ports:
             - "8822:8000"
         volumes:
