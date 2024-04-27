@@ -93,22 +93,23 @@ def create_tables(conn):
 
 def insert_into_table(conn, table_name, table_type, data):
     str_embedding = "[" + ",".join(map(str, data['embedding'])) + "]"
+    table_name_single = table_name[:-1]
     with conn.cursor() as cursor:
-        # possible names for table_name: TVShow, Anime, Movie
-        select_title = f"SELECT {table_name}ID FROM {table_name}s WHERE Title = %s;"
+        # possible names for table_name: TVShows, Animes, Movies
+        select_title = f"SELECT {table_name_single}ID FROM {table_name} WHERE Title = %s;"
         cursor.execute(select_title, (data['title'],))
         show_id = cursor.fetchone()
         if show_id:
             show_id = show_id[0]
         else:
-            insert_title = f"INSERT INTO {table_name}s (Title) VALUES (%s) RETURNING {table_name}ID;"
+            insert_title = f"INSERT INTO {table_name} (Title) VALUES (%s) RETURNING {table_name_single}ID;"
             cursor.execute(insert_title, (data['title'],))
             show_id = cursor.fetchone()[0]
 
         if table_type == "descriptions":
             cursor.execute(
                 f"""
-                INSERT INTO Descriptions (EpisodeID, PlainText, Embedding, {table_name}ID)
+                INSERT INTO Descriptions (EpisodeID, PlainText, Embedding, {table_name_single}ID)
                 VALUES (%s, %s, %s, %s)
                 """,
                 (data['episode_id'], data['plain_text'], str_embedding, show_id)
@@ -116,7 +117,7 @@ def insert_into_table(conn, table_name, table_type, data):
         elif table_type == "subtitles":
             cursor.execute(
                 f"""
-                INSERT INTO Subtitles (EpisodeID, Language, Timestamp, PlainText, Embedding, {table_name}ID)
+                INSERT INTO Subtitles (EpisodeID, Language, Timestamp, PlainText, Embedding, {table_name_single}ID)
                 VALUES (%s, %s, %s, %s, %s, %s)
                 """,
                 (data['episode_id'], data['language'], data['timestamp'], data['plain_text'], str_embedding, show_id)
@@ -124,43 +125,45 @@ def insert_into_table(conn, table_name, table_type, data):
     conn.commit()
 
 
-def query_description(conn, query: np.ndarray, show: str = None):
+def query_description(conn, query: np.ndarray, show: str = None, table: str = None):
+    if not table:
+        return ["No table specified"]
+    # table is either TVShows, Animes, or Movies
+    id_name = f"{table[:-1]}ID"
     str_embedding = "[" + ",".join(map(str, query)) + "]"
+    where_title = f"WHERE t.Title = '{show}'" if show else ""
+    sql_string = f"""
+            SELECT t.Title, d.EpisodeID, d.PlainText, d.Embedding
+            FROM {table} AS t
+            JOIN Descriptions AS d ON t.{id_name} = d.{id_name}
+            {where_title}
+            ORDER BY d.Embedding <=> %s
+            LIMIT 5
+            """
     with conn.cursor() as cursor:
-        if show:
-            cursor.execute(
-                """
-                SELECT show_name, episode_id, plain_text, embedding FROM descriptions WHERE show_name = %s ORDER BY embedding <=> %s LIMIT 5
-                """,
-                (show, str_embedding)
-            )
-        else:
-            cursor.execute(
-                """
-                SELECT show_name, episode_id, plain_text, embedding FROM descriptions ORDER BY embedding <=> %s LIMIT 5
-                """,
-                (str_embedding,)
-            )
+        cursor.execute(sql_string, (str_embedding,))
         return cursor.fetchall()
 
 
-def query_subtitle(conn, query: np.ndarray, show: str = None):
+def query_subtitle(conn, query: np.ndarray, show: str = None, table: str = None, language: str = None):
+    if not table:
+        return ["No table specified"]
     str_embedding = "[" + ",".join(map(str, query)) + "]"
+    table_id = f"{table[:-1]}ID"
+    where_title = f"WHERE t.Title = '{show}'" if show else ""
+    and_or_where = "AND" if where_title else "WHERE"
+    lang = f"{and_or_where} language = '{language}'" if language else ""
+    sql_string = f"""
+            SELECT t.Title, d.EpisodeID, d.Language, d.Timestamp, d.PlainText, d.Embedding
+            FROM {table} AS t
+            JOIN Subtitles AS d ON t.{table_id} = d.{table_id}
+            {where_title}
+            {lang}
+            ORDER BY d.Embedding <=> %s
+            LIMIT 5
+            """
     with conn.cursor() as cursor:
-        if show:
-            cursor.execute(
-                """
-                SELECT show_name, episode_id, timestamp, plain_text, embedding FROM subtitles WHERE show_name = %s ORDER BY embedding <=> %s LIMIT 5
-                """,
-                (show, str_embedding)
-            )
-        else:
-            cursor.execute(
-                """
-                SELECT show_name, episode_id, timestamp, plain_text, embedding FROM subtitles ORDER BY embedding <=> %s LIMIT 5
-                """,
-                (str_embedding,)
-            )
+        cursor.execute(sql_string, (str_embedding,))
         return cursor.fetchall()
 
 
@@ -189,7 +192,44 @@ def get_existing_media(table, conn):
     with conn.cursor() as cursor:
         cursor.execute(
             f"""
-            SELECT DISTINCT Title FROM {table}s
+            SELECT DISTINCT Title FROM {table}
             """
         )
         return cursor.fetchall()
+
+
+def size_of_db(conn):
+    # get the number of rows of each table
+    with conn.cursor() as cursor:
+        cursor.execute(
+            """
+            SELECT COUNT(*) FROM TVShows;
+            """
+        )
+        tv_shows = cursor.fetchone()[0]
+        cursor.execute(
+            """
+            SELECT COUNT(*) FROM Animes;
+            """
+        )
+        animes = cursor.fetchone()[0]
+        cursor.execute(
+            """
+            SELECT COUNT(*) FROM Movies;
+            """
+        )
+        movies = cursor.fetchone()[0]
+        cursor.execute(
+            """
+            SELECT COUNT(*) FROM Descriptions;
+            """
+        )
+        descriptions = cursor.fetchone()[0]
+        cursor.execute(
+            """
+            SELECT COUNT(*) FROM Subtitles;
+            """
+        )
+        subtitles = cursor.fetchone()[0]
+        return {'tv_shows': tv_shows, 'animes': animes, 'movies': movies,
+                'descriptions': descriptions, 'subtitles': subtitles}

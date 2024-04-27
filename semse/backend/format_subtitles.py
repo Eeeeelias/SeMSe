@@ -39,7 +39,11 @@ def subtitle_information(input_file):
         except IndexError:
             language = "unknown"
         if len(language) == 2 or len(language) == 3:
-            language = iso639.to_name(language)
+            try:
+                language = iso639.to_name(language)
+            except KeyError:
+                print(f"Found unknown language code {language}, skipping subtitle stream.")
+                language = "unknown"
         else:
             language = "unknown"
         if language not in WANTED_LANGUAGES:
@@ -72,7 +76,11 @@ def subtitle_information(input_file):
 
         language = stream.get("tags", {}).get("language", "unknown")
         if len(language) == 2 or len(language) == 3:
-            language = iso639.to_name(language)
+            try:
+                language = iso639.to_name(language)
+            except Exception as e:
+                print(f"Found unknown language code {language}, skipping subtitle stream.")
+                language = "unknown"
         else:
             language = "unknown"
         # check if the language is in the wanted languages or if we already have it
@@ -86,8 +94,13 @@ def extract_subtitles(video_file, process_path, index=None):
     # check if srt file exists, add it to the subtitles dict
     # srt_file = os.path.join(root, os.path.splitext(file)[0] + ".srt")
     if os.path.splitext(video_file)[1] == ".srt":
-        with open(video_file, 'r') as file:
-            subtitles = file.read()
+        try:
+            with open(video_file, 'r', encoding='utf-8') as file:
+                subtitles = file.read()
+            return subtitles
+        except UnicodeDecodeError:
+            with open(video_file, 'r', encoding='latin-1') as file:
+                subtitles = file.read()
         return subtitles
 
     # extract subtitles from video file
@@ -95,7 +108,7 @@ def extract_subtitles(video_file, process_path, index=None):
     command = f"ffmpeg -hide_banner -loglevel panic -i \"{video_file}\" -map 0:s:{index} -c:s srt -f srt -y {process_path}{sub_name}.srt"
     subprocess.run(command, shell=True)
     if os.path.exists(f"{process_path}{sub_name}.srt"):
-        with open(f"{process_path}{sub_name}.srt", "r") as file:
+        with open(f"{process_path}{sub_name}.srt", "r", encoding='utf-8') as file:
             subtitles = file.read()
         os.remove(f"{process_path}{sub_name}.srt")
         return subtitles

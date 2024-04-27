@@ -2,7 +2,7 @@
 from backend.retrieve_embeddings import encode_text, compute_cosine_similarity
 from backend import database_functions as dbf
 
-
+"""
 def query_db(query: str, show: str = None):
     conn = dbf.get_conn()
     query = encode_text(query)
@@ -25,3 +25,26 @@ def query_db(query: str, show: str = None):
         results.append(result)
     # sort the results by cosine similarity
     return sorted(results, key=lambda x: x[0], reverse=True)
+"""
+
+
+def query_db(query: str, show: str = None, table: str = None, language: str = 'English'):
+    conn = dbf.get_conn()
+    query = encode_text(query)
+    results_sub = dbf.query_subtitle(conn, query, show, table, language)
+
+    results = {}
+    for idx, result in enumerate(results_sub):
+        title, episode_id, _, timestamp, text, embedding = result
+        similarity = compute_cosine_similarity(query, eval(embedding))
+        results[idx] = {'title': title, 'episode_id': episode_id, 'timestamp': timestamp,
+                        'text': text, 'similarity': similarity, 'type': 'subtitle'}
+
+    # query descriptions as well
+    results_desc = dbf.query_description(conn, query, show, table)
+    for idx, result in enumerate(results_desc):
+        title, episode_id, text, embedding = result
+        similarity = compute_cosine_similarity(query, eval(embedding))
+        results[idx + len(results)] = {'title': title, 'episode_id': episode_id, 'text': text,
+                                       'similarity': similarity, 'type': 'description'}
+    return results

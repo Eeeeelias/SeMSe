@@ -4,12 +4,12 @@ import time
 import backend.database_functions as dbf
 
 convert_dirs = {
-    "TV Shows": "TVShow",
-    "Animes": "Anime",
-    "Movies": "Movie",
-    "Anime": "Anime",
-    "TV Show": "TVShow",
-    "Movie": "Movie",
+    "TV Shows": "TVShows",
+    "Animes": "Animes",
+    "Movies": "Movies",
+    "Anime": "Animes",
+    "TV Show": "TVShows",
+    "Movie": "Movies",
 }
 
 

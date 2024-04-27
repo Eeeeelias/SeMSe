@@ -84,7 +84,7 @@ def extract_raw_info(path, movie=False):
 
 
 def retrieve_media(path, table_name) -> (dict, dict):
-    movie = True if table_name == "Movie" else False
+    movie = True if table_name == "Movies" else False
     descriptions, subtitles = extract_raw_info(path, movie=movie)
     show_title = os.path.basename(path)
     if movie:
