@@ -125,34 +125,39 @@ def insert_into_table(conn, table_name, table_type, data):
     conn.commit()
 
 
-def query_description(conn, query: np.ndarray, show: str = None, table: str = None, limit: int = 5):
+def query_description(conn: psycopg2.connect, query: np.ndarray, show: str = None,
+                      table: str = None, limit: int = 5, offset: int = 0):
     if not table:
         return ["No table specified"]
     # table is either TVShows, Animes, or Movies
     id_name = f"{table[:-1]}ID"
     str_embedding = "[" + ",".join(map(str, query)) + "]"
-    where_title = f"WHERE t.Title = '{show}'" if show else ""
+    where_title = "WHERE t.Title = %s" if show else ""
     sql_string = f"""
             SELECT t.Title, d.EpisodeID, d.PlainText, d.Embedding
             FROM {table} AS t
             JOIN Descriptions AS d ON t.{id_name} = d.{id_name}
             {where_title}
             ORDER BY d.Embedding <=> %s
-            LIMIT {limit}
+            LIMIT %s OFFSET %s
             """
+    # Parameters for the query
+    params = [x for x in [show, str_embedding, limit, offset] if x]
+
     with conn.cursor() as cursor:
-        cursor.execute(sql_string, (str_embedding,))
+        cursor.execute(sql_string, [x for x in params if x])
         return cursor.fetchall()
 
 
-def query_subtitle(conn, query: np.ndarray, show: str = None, table: str = None, language: str = None, limit: int = 5):
+def query_subtitle(conn: psycopg2.connect, query: np.ndarray, show: str = None,
+                   table: str = None, language: str = None, limit: int = 5, offset: int = 0):
     if not table:
         return ["No table specified"]
     str_embedding = "[" + ",".join(map(str, query)) + "]"
     table_id = f"{table[:-1]}ID"
-    where_title = f"WHERE t.Title = '{show}'" if show else ""
+    where_title = "WHERE t.Title = %s" if show else ""
     and_or_where = "AND" if where_title else "WHERE"
-    lang = f"{and_or_where} language = '{language}'" if language else ""
+    lang = f"{and_or_where} language = %s" if language else ""
     sql_string = f"""
             SELECT t.Title, d.EpisodeID, d.Language, d.Timestamp, d.PlainText, d.Embedding
             FROM {table} AS t
@@ -160,11 +165,19 @@ def query_subtitle(conn, query: np.ndarray, show: str = None, table: str = None,
             {where_title}
             {lang}
             ORDER BY d.Embedding <=> %s
-            LIMIT {limit}
+            LIMIT %s OFFSET %s
             """
-    with conn.cursor() as cursor:
-        cursor.execute(sql_string, (str_embedding,))
-        return cursor.fetchall()
+
+    # Parameters for the query
+    params = [x for x in [show, language, str_embedding, limit, offset] if x]
+
+    try:
+        with conn.cursor() as cursor:
+            cursor.execute(sql_string, params)
+            return cursor.fetchall()
+    except Exception as e:
+        print(e)
+        return []
 
 
 def remove_table(conn, table_name: str):
@@ -181,7 +194,7 @@ def remove_show(conn, show_name: str):
     with conn.cursor() as cursor:
         cursor.execute(
             """
-            DELETE FROM descriptions, subtitles WHERE show_name = %s
+            DELETE FROM Descriptions subtitles WHERE show_name = %s
             """,
             (show_name,)
         )

@@ -12,26 +12,26 @@ def format_episode_id(episode_id: str):
     return episode_id
 
 
-def query_db(query: str, show: str = None, table: str = None, language: str = 'English', type='both'):
+def query_db(query: str, show: str = None, table: str = None, language: str = 'English', type='both', offset=0):
     conn = dbf.get_conn()
     query = encode_text(query)
 
     if type == 'description':
-        results = description_query(conn, query, show, table, limit=10)
+        results = description_query(conn, query, show, table, limit=10, offset=offset)
     elif type == 'conversation':
-        results = subtitle_query(conn, query, show, table, language, limit=10)
+        results = subtitle_query(conn, query, show, table, language, limit=10, offset=offset)
     else:
-        results_sub = subtitle_query(conn, query, show, table, language)
-        results_desc = description_query(conn, query, show, table, len(results_sub))
+        results_sub = subtitle_query(conn, query, show, table, language, limit=5, offset=offset)
+        results_desc = description_query(conn, query, show, table, len(results_sub), limit=5, offset=offset)
         results = {**results_desc, **results_sub}
 
     # query descriptions as well
     return results
 
 
-def subtitle_query(conn, embed_query: np.ndarray,
-                   show: str = None, table: str = None, language: str = 'English', limit=5):
-    results_sub = dbf.query_subtitle(conn, embed_query, show, table, language, limit)
+def subtitle_query(conn, embed_query: np.ndarray, show: str = None,
+                   table: str = None, language: str = 'English', limit=5, offset=0):
+    results_sub = dbf.query_subtitle(conn, embed_query, show, table, language, limit, offset)
     results = {}
     for idx, result in enumerate(results_sub):
         title, episode_id, _, timestamp, text, embedding = result
@@ -41,8 +41,8 @@ def subtitle_query(conn, embed_query: np.ndarray,
     return results
 
 
-def description_query(conn, embed_query: np.ndarray, show: str = None, table: str = None, ex=0, limit=5):
-    results_desc = dbf.query_description(conn, embed_query, show, table, limit)
+def description_query(conn, embed_query: np.ndarray, show: str = None, table: str = None, ex=0, limit=5, offset=0):
+    results_desc = dbf.query_description(conn, embed_query, show, table, limit, offset)
     results = {}
     for idx, result in enumerate(results_desc):
         title, episode_id, text, embedding = result
