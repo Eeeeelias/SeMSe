@@ -36,20 +36,21 @@ def query_media(request):
         type = data['type']
     except KeyError:
         type = "both"
-
     try:
         offset = data['offset']
     except KeyError:
         offset = 0
 
-    print("Finding media with query: " + query, "show: " + str(show), "table: " + table, "type: " + type)
-    query_result = uq.query_db(query, show, table=table, language=data['language'], type=type)
+    print("Finding media with query: " + query, "show: " + str(show), "table: " + table, "type: " + type, "offset: " + offset)
+    query_result = uq.query_db(query, show, table=table, language=data['language'], type=type, offset=offset)
     return JsonResponse(query_result)
 
 
 @ensure_csrf_cookie
 def test_api(request):
-    html = "<html><body>Test API</body></html>"
+    # fuck django templates
+    with open('semse_api/template.html', 'r') as f:
+        html = f.read()
     return HttpResponse(html)
 
 

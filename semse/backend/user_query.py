@@ -31,22 +31,26 @@ def query_db(query: str, show: str = None, table: str = None, language: str = 'E
 
 def subtitle_query(conn, embed_query: np.ndarray, show: str = None,
                    table: str = None, language: str = 'English', limit=5, offset=0):
+
     results_sub = dbf.query_subtitle(conn, embed_query, show, table, language, limit, offset)
     results = {}
     for idx, result in enumerate(results_sub):
         title, episode_id, _, timestamp, text, embedding = result
         similarity = compute_cosine_similarity(embed_query, eval(embedding))
-        results[idx] = {'title': title, 'episode_id': format_episode_id(episode_id), 'timestamp': timestamp,
-                        'text': text, 'similarity': similarity, 'type': 'conversation'}
+        offset = int(offset)
+        results[idx + offset] = {'title': title, 'episode_id': format_episode_id(episode_id), 'timestamp': timestamp,
+                                 'text': text, 'similarity': similarity, 'type': 'conversation'}
     return results
 
 
 def description_query(conn, embed_query: np.ndarray, show: str = None, table: str = None, ex=0, limit=5, offset=0):
+
     results_desc = dbf.query_description(conn, embed_query, show, table, limit, offset)
     results = {}
     for idx, result in enumerate(results_desc):
         title, episode_id, text, embedding = result
         similarity = compute_cosine_similarity(embed_query, eval(embedding))
-        results[idx + ex] = {'title': title, 'episode_id': format_episode_id(episode_id), 'text': text,
-                             'similarity': similarity, 'type': 'description'}
+        offset = int(offset)
+        results[idx + ex + offset] = {'title': title, 'episode_id': format_episode_id(episode_id), 'text': text,
+                                      'similarity': similarity, 'type': 'description'}
     return results

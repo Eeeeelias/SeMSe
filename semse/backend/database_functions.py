@@ -142,7 +142,7 @@ def query_description(conn: psycopg2.connect, query: np.ndarray, show: str = Non
             LIMIT %s OFFSET %s
             """
     # Parameters for the query
-    params = [x for x in [show, str_embedding, limit, offset] if x]
+    params = [x for x in [show, str_embedding, limit, offset] if x not in [None, ""]]
 
     with conn.cursor() as cursor:
         cursor.execute(sql_string, [x for x in params if x])
@@ -169,7 +169,7 @@ def query_subtitle(conn: psycopg2.connect, query: np.ndarray, show: str = None,
             """
 
     # Parameters for the query
-    params = [x for x in [show, language, str_embedding, limit, offset] if x]
+    params = [x for x in [show, language, str_embedding, limit, offset] if x not in [None, ""]]
 
     try:
         with conn.cursor() as cursor:
