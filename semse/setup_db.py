@@ -2,6 +2,7 @@ import os
 import time
 
 import backend.database_functions as dbf
+import backend.retrieve_embeddings as ret
 
 convert_dirs = {
     "TV Shows": "TVShows",
@@ -16,7 +17,7 @@ convert_dirs = {
 def add_media_to_db(conn, path: str, table_name):
     # table_name here is already converted to the correct table name
     # get all descriptions and subtitle texts from video files
-    descriptions, subtitles = dbf.retrieve_media(path, table_name)
+    descriptions, subtitles = ret.retrieve_media(path, table_name)
     for desc_id, data in descriptions.items():
         dbf.insert_into_table(conn, table_name, "descriptions", data)
 

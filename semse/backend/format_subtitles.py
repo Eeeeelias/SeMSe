@@ -12,8 +12,12 @@ load_dotenv()
 try:
     WANTED_LANGUAGES = os.getenv("LANGUAGES").split(",")
 except AttributeError:
-    WANTED_LANGUAGES = ["en", "de"]
-WANTED_LANGUAGES = [iso639.to_name(key) for key in WANTED_LANGUAGES]
+    WANTED_LANGUAGES = ["en"]
+try:
+    WANTED_LANGUAGES = [iso639.to_name(key) for key in WANTED_LANGUAGES]
+except KeyError:
+    print("Invalid language code in .env file, please check the LANGUAGES variable.")
+    exit(1)
 
 
 def convert_stamp_to_seconds(time: str):

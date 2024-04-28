@@ -2,10 +2,16 @@ import os
 import re
 import numpy as np
 from sentence_transformers import SentenceTransformer
-from backend.format_subtitles import extract_subtitles, format_subtitles, subtitle_information
+from backend.format_subtitles import extract_subtitles, format_subtitles, subtitle_information, WANTED_LANGUAGES
 from uuid import uuid4
 
-model = SentenceTransformer("paraphrase-multilingual-mpnet-base-v2")
+
+if WANTED_LANGUAGES == ["English"]:
+    model = SentenceTransformer("all-MiniLM-L6-v2")
+else:
+    model = SentenceTransformer("paraphrase-multilingual-mpnet-base-v2")
+print("Using model: all-MiniLM-L6-v2" if WANTED_LANGUAGES == ["English"] else
+      "Using model: paraphrase-multilingual-mpnet-base-v2")
 
 
 def compute_cosine_similarity(u: np.ndarray, v: np.ndarray) -> float:

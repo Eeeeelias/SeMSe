@@ -3,7 +3,7 @@ import numpy as np
 import psycopg2
 import os
 from dotenv import load_dotenv
-from backend.retrieve_embeddings import retrieve_media, encode_text, compute_cosine_similarity
+from backend.retrieve_embeddings import WANTED_LANGUAGES
 
 
 load_dotenv()
@@ -34,9 +34,13 @@ def enable_extension(conn, extension):
 
 
 def create_tables(conn):
+    if WANTED_LANGUAGES == ["English"]:
+        vector_length = 384
+    else:
+        vector_length = 768
     with conn.cursor() as cursor:
         cursor.execute(
-            """
+            f"""
             CREATE TABLE IF NOT EXISTS TVShows(
             TVShowID SERIAL PRIMARY KEY,
             Title VARCHAR(255) NOT NULL
@@ -56,7 +60,7 @@ def create_tables(conn):
             DescriptionID SERIAL PRIMARY KEY,
             EpisodeID VARCHAR(255),
             PlainText TEXT NOT NULL,
-            Embedding vector(768) NOT NULL,
+            Embedding vector({vector_length}) NOT NULL,
             TVShowID INT,
             AnimeID INT,
             MovieID INT,
@@ -71,7 +75,7 @@ def create_tables(conn):
             Language VARCHAR(255) NOT NULL,
             Timestamp VARCHAR(255) NOT NULL,
             PlainText TEXT NOT NULL,
-            Embedding vector(768) NOT NULL,
+            Embedding vector({vector_length}) NOT NULL,
             TVShowID INT,
             AnimeID INT,
             MovieID INT,
