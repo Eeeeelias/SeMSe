@@ -19,30 +19,28 @@ def get_all_media(request):
 
 def query_media(request):
     data = request.POST
-    try:
-        query = data['query']
-    except KeyError:
-        # return 400 bad request
-        return JsonResponse({'error': 'No query provided'}, status=400)
-    try:
-        table = data['table']
-    except KeyError:
-        return JsonResponse({'error': 'No table provided'}, status=400)
-    try:
-        show = data['show']
-    except KeyError:
-        show = None
-    try:
-        type = data['type']
-    except KeyError:
-        type = "both"
-    try:
-        offset = data['offset']
-    except KeyError:
-        offset = 0
+    keys_defaults = {
+        'query': None,
+        'table': None,
+        'show': None,
+        'type': "both",
+        'offset': 0,
+        'season': None,
+        'language': None
+    }
 
-    print("Finding media with query: " + query, "show: " + str(show), "table: " + table, "type: " + type, "offset: " + offset)
-    query_result = uq.query_db(query, show, table=table, language=data['language'], type=type, offset=offset)
+    # Get values from data or use default
+    params = {key: data.get(key, default) for key, default in keys_defaults.items()}
+
+    # Check for required parameters
+    if not params['query'] or not params['table']:
+        return JsonResponse({'error': 'No query or table provided'}, status=400)
+
+    print(
+        f"Finding media with query: {params['query']}, show: {params['show']}, table: {params['table']}, "
+        f"type: {params['type']}, offset: {params['offset']}")
+
+    query_result = uq.query_db(**params)
     return JsonResponse(query_result)
 
 

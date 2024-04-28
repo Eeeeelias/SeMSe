@@ -126,23 +126,28 @@ def insert_into_table(conn, table_name, table_type, data):
 
 
 def query_description(conn: psycopg2.connect, query: np.ndarray, show: str = None,
-                      table: str = None, limit: int = 5, offset: int = 0):
+                      table: str = None, limit: int = 5, offset: int = 0, season: str = None):
     if not table:
         return ["No table specified"]
     # table is either TVShows, Animes, or Movies
     id_name = f"{table[:-1]}ID"
     str_embedding = "[" + ",".join(map(str, query)) + "]"
     where_title = "WHERE t.Title = %s" if show else ""
+    and_or_where = "AND" if where_title else "WHERE"
+    season_sql = f"{and_or_where} d.EpisodeID LIKE %s" if season else ""
+    season = season + "%" if season else ""
+
     sql_string = f"""
             SELECT t.Title, d.EpisodeID, d.PlainText, d.Embedding
             FROM {table} AS t
             JOIN Descriptions AS d ON t.{id_name} = d.{id_name}
             {where_title}
+            {season_sql}
             ORDER BY d.Embedding <=> %s
             LIMIT %s OFFSET %s
             """
     # Parameters for the query
-    params = [x for x in [show, str_embedding, limit, offset] if x not in [None, ""]]
+    params = [x for x in [show, season, str_embedding, limit, offset] if x not in [None, ""]]
 
     with conn.cursor() as cursor:
         cursor.execute(sql_string, [x for x in params if x])
@@ -150,7 +155,7 @@ def query_description(conn: psycopg2.connect, query: np.ndarray, show: str = Non
 
 
 def query_subtitle(conn: psycopg2.connect, query: np.ndarray, show: str = None,
-                   table: str = None, language: str = None, limit: int = 5, offset: int = 0):
+                   table: str = None, language: str = None, limit: int = 5, offset: int = 0, season: str = None):
     if not table:
         return ["No table specified"]
     str_embedding = "[" + ",".join(map(str, query)) + "]"
@@ -158,19 +163,22 @@ def query_subtitle(conn: psycopg2.connect, query: np.ndarray, show: str = None,
     where_title = "WHERE t.Title = %s" if show else ""
     and_or_where = "AND" if where_title else "WHERE"
     lang = f"{and_or_where} language = %s" if language else ""
+    and_or_where = "AND" if where_title or language else "WHERE"
+    season_sql = f"{and_or_where} d.EpisodeID LIKE %s" if season else ""
+    season = season + "%" if season else ""
     sql_string = f"""
             SELECT t.Title, d.EpisodeID, d.Language, d.Timestamp, d.PlainText, d.Embedding
             FROM {table} AS t
             JOIN Subtitles AS d ON t.{table_id} = d.{table_id}
             {where_title}
             {lang}
+            {season_sql}
             ORDER BY d.Embedding <=> %s
             LIMIT %s OFFSET %s
             """
 
     # Parameters for the query
-    params = [x for x in [show, language, str_embedding, limit, offset] if x not in [None, ""]]
-
+    params = [x for x in [show, language, season, str_embedding, limit, offset] if x not in [None, ""]]
     try:
         with conn.cursor() as cursor:
             cursor.execute(sql_string, params)

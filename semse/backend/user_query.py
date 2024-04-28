@@ -12,17 +12,20 @@ def format_episode_id(episode_id: str):
     return episode_id
 
 
-def query_db(query: str, show: str = None, table: str = None, language: str = 'English', type='both', offset=0):
+def query_db(query: str, show: str = None, table: str = None,
+             language: str = 'English', season=None, type='both', offset=0):
     conn = dbf.get_conn()
     query = encode_text(query)
 
+    general_data = [conn, query, show, table]
+
     if type == 'description':
-        results = description_query(conn, query, show, table, limit=10, offset=offset)
+        results = description_query(*general_data, limit=10, offset=offset, season=season)
     elif type == 'conversation':
-        results = subtitle_query(conn, query, show, table, language, limit=10, offset=offset)
+        results = subtitle_query(*general_data, language, limit=10, offset=offset, season=season)
     else:
-        results_sub = subtitle_query(conn, query, show, table, language, limit=5, offset=offset)
-        results_desc = description_query(conn, query, show, table, len(results_sub), limit=5, offset=offset)
+        results_sub = subtitle_query(*general_data, language, limit=5, offset=offset, season=season)
+        results_desc = description_query(*general_data, len(results_sub), limit=5, offset=offset, season=season)
         results = {**results_desc, **results_sub}
 
     # query descriptions as well
@@ -30,9 +33,9 @@ def query_db(query: str, show: str = None, table: str = None, language: str = 'E
 
 
 def subtitle_query(conn, embed_query: np.ndarray, show: str = None,
-                   table: str = None, language: str = 'English', limit=5, offset=0):
+                   table: str = None, language: str = 'English', limit=5, offset=0, season=None):
 
-    results_sub = dbf.query_subtitle(conn, embed_query, show, table, language, limit, offset)
+    results_sub = dbf.query_subtitle(conn, embed_query, show, table, language, limit, offset, season)
     results = {}
     for idx, result in enumerate(results_sub):
         title, episode_id, _, timestamp, text, embedding = result
@@ -43,9 +46,10 @@ def subtitle_query(conn, embed_query: np.ndarray, show: str = None,
     return results
 
 
-def description_query(conn, embed_query: np.ndarray, show: str = None, table: str = None, ex=0, limit=5, offset=0):
+def description_query(conn, embed_query: np.ndarray, show: str = None,
+                      table: str = None, ex=0, limit=5, offset=0, season=None):
 
-    results_desc = dbf.query_description(conn, embed_query, show, table, limit, offset)
+    results_desc = dbf.query_description(conn, embed_query, show, table, limit, offset, season)
     results = {}
     for idx, result in enumerate(results_desc):
         title, episode_id, text, embedding = result
