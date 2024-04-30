@@ -36,6 +36,9 @@ def query_media(request):
     if not params['query'] or not params['table']:
         return JsonResponse({'error': 'No query or table provided'}, status=400)
 
+    if params['table'] not in ['Animes', 'Movies', 'TVShows']:
+        return JsonResponse({'error': 'Invalid table provided'}, status=403)
+
     print(
         f"Finding media with query: {params['query']}, show: {params['show']}, table: {params['table']}, "
         f"type: {params['type']}, offset: {params['offset']}")

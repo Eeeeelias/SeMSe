@@ -78,20 +78,16 @@ def save_images_from_bif(bif_data, output_directory):
 bif_file = '/mnt/MediaFiles/MediaFiles/TV Shows/Arcane/Season 01/trickplay/Arcane S01E01-320.bif'
 
 # connect to db
-# conn = psycopg2.connect(
-#     host="192.168.0.3",
-#     database="postgres",
-#     user="postgres",
-#     password="secret"
-# )
+conn = psycopg2.connect(
+    host="192.168.0.2",
+    database="postgres",
+    user="postgres",
+    password="secret"
+)
 
-problem_file = "/mnt/MediaFiles/MediaFiles/Anime/Yuru Camp/Season 03/Laid-Back Camp S03E03 - We're Off! Land of Suspension Bridges.mkv"
 
-root_dir = "/mnt/MediaFiles/MediaFiles/Anime/Yuru Camp/Season 03"
-file_name = "Laid-Back Camp S03E03 - We're Off! Land of Suspension Bridges.mkv"
-# get subtitles
-subtitles = retrieve_subtitles(root_dir, file_name)
+query = "So, Rin-chan, let's cross all the bridges  we see along the way to Lake Hatanagi. Okay."
+query = query_db(query, show='Yuru Camp', table='Animes', type='conversation', conn=conn)
 
-# encode subtitles
-subtitles = [x for x in subtitles.values() if x['end'] == '00:10:21,320'][0]
-embedding = encode_text(subtitles['plain_text'])
+for q, v in query.items():
+    print(q, v)
