@@ -8,10 +8,10 @@ from uuid import uuid4
 
 if WANTED_LANGUAGES == ["English"]:
     model = SentenceTransformer("all-MiniLM-L6-v2")
+    MAX_TOKENS = 256
 else:
     model = SentenceTransformer("paraphrase-multilingual-mpnet-base-v2")
-print("Using model: all-MiniLM-L6-v2" if WANTED_LANGUAGES == ["English"] else
-      "Using model: paraphrase-multilingual-mpnet-base-v2")
+    MAX_TOKENS = 128
 
 
 def compute_cosine_similarity(u: np.ndarray, v: np.ndarray) -> float:
@@ -19,8 +19,49 @@ def compute_cosine_similarity(u: np.ndarray, v: np.ndarray) -> float:
     return (u @ v) / (np.linalg.norm(u) * np.linalg.norm(v))
 
 
-def encode_text(description) -> np.ndarray:
-    return model.encode(description)
+def find_end(description_part):
+    # given a description part of no more than 150 words, find the last sentence ending character within 50 characters
+    for i in range(len(description_part) - 1, max(len(description_part) - 50, 0), -1):
+        if description_part[i] in ['.', '!', '?']:
+            return i
+
+    # if no sentence ending character is found, look for a comma
+    for i in range(len(description_part) - 1, max(len(description_part) - 50, 0), -1):
+        if description_part[i] == ',':
+            return i
+
+    return len(description_part) // 2
+
+
+def split_description(description):
+    if len(model.tokenize([description])['input_ids'][0]) < MAX_TOKENS:
+        return [description]
+    desc_splits = description.split(" ")
+    check_parts = (len(desc_splits) // 150) + 1
+    if check_parts == 1:
+        return [description]
+
+    description_parts = []
+    split_idx = 0
+    global_end = 0
+    for _ in range(check_parts):
+        # join the split_idx : i + 150 words
+        split_text = " ".join(desc_splits[split_idx: split_idx + 150])
+
+        end = find_end(split_text)
+        # find the correct location in the split text to continue from
+        split_idx = len(description[:global_end + end].split(" "))
+
+        # plus one to include the sentence ending character
+        description_parts.append(split_text[:end + 1])
+        global_end += end + 1
+    return description_parts
+
+
+def encode_text(description) -> tuple[list, list[np.ndarray]]:
+    # tokenize and encode the description
+    description_parts = split_description(description)
+    return description_parts, [model.encode(part) for part in description_parts]
 
 
 def retrieve_description(root, file, movie=False) -> dict | None:
@@ -66,6 +107,19 @@ def retrieve_subtitles(root, file, movie=False):
         subs = extract_subtitles(video_file, "/tmp/", index=lang_sub)
         if subs:
             formatted_subs_episode = format_subtitles(subs)
+
+            # get the number of words in the subtitles as well as the last timestamp
+            word_length = len(" ".join([x['plain_text'] for x in formatted_subs_episode.values()]).split(" "))
+            episode_length = max([x['end'] for x in formatted_subs_episode.values()])
+            episode_length = int(episode_length.split(":")[0]) * 60 + int(episode_length.split(":")[1])
+            try:
+                if word_length / episode_length > 200:
+                    print(f"Subtitles for {os.path.basename(file)} are likely broken, skipping")
+                    continue
+            except ZeroDivisionError:
+                print(f"Episode length is 0 for {os.path.basename(file)}, skipping")
+                continue
+
             for sub in formatted_subs_episode:
                 formatted_subs_episode[sub]['episode_id'] = episode_id
                 formatted_subs_episode[sub]['language'] = sub_info[lang_sub]['language']
@@ -104,17 +158,36 @@ def retrieve_media(path, table_name) -> (dict, dict):
     print(f"Found {len(descriptions)} descriptions and {len(subtitles)} conversations "
           f"in {num_langs} language(s)", end=" ")
     # add descriptions to db
-    desc_embeddigns = {idx: {'title': show_title, 'episode_id': descriptions[key]['episode_id'],
-                             'plain_text': descriptions[key]['description'],
-                             'embedding': encode_text(descriptions[key]['description'])}
-                       for idx, key in enumerate(descriptions.keys())}
+    desc_embeddings = {}
+    sub_embeddings = {}
+    for idx, key in enumerate(descriptions.keys()):
+        text_parts, encoded_text = encode_text(descriptions[key]['description'])
+        if len(encoded_text) > 1:
+            for i, text in enumerate(encoded_text):
+                desc_embeddings[f"{idx}_{i}"] = {'title': show_title, 'episode_id': descriptions[key]['episode_id'],
+                                                 'plain_text': text_parts[i],
+                                                 'embedding': text, 'part': i}
+        else:
+            desc_embeddings[idx] = {'title': show_title, 'episode_id': descriptions[key]['episode_id'],
+                                    'plain_text': descriptions[key]['description'],
+                                    'embedding': encoded_text[0], 'part': None}
 
-    sub_embeddings = {idx: {'title': show_title,
-                            'episode_id': subtitles[key]['episode_id'],
-                            'timestamp': f"{subtitles[key]['start']} - {subtitles[key]['end']}",
-                            'plain_text': subtitles[key]['plain_text'],
-                            'language': subtitles[key]['language'],
-                            'embedding': encode_text(subtitles[key]['plain_text'])}
-                      for idx, key in enumerate(subtitles.keys())}
+    for idx, key in enumerate(subtitles.keys()):
+        text_parts, encoded_text = encode_text(subtitles[key]['plain_text'])
+        if len(encoded_text) > 1:
+            for i, text in enumerate(encoded_text):
+                sub_embeddings[f"{idx}_{i}"] = {'title': show_title,
+                                                'episode_id': subtitles[key]['episode_id'],
+                                                'timestamp': f"{subtitles[key]['start']} - {subtitles[key]['end']}",
+                                                'plain_text': text_parts[i],
+                                                'language': subtitles[key]['language'],
+                                                'embedding': text,
+                                                'part': i}
+        else:
+            sub_embeddings[idx] = {'title': show_title, 'episode_id': subtitles[key]['episode_id'],
+                                   'timestamp': f"{subtitles[key]['start']} - {subtitles[key]['end']}",
+                                   'plain_text': subtitles[key]['plain_text'],
+                                   'language': subtitles[key]['language'],
+                                   'embedding': encoded_text[0], 'part': None}
 
-    return desc_embeddigns, sub_embeddings
+    return desc_embeddings, sub_embeddings

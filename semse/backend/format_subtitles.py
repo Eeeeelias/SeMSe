@@ -134,7 +134,8 @@ def format_subtitles(subs):
             else:
                 conversation_id = str(uuid4())
                 conversation_text = re.sub(r"<.*?>", "", conversation_text)
-                conversation_text = re.sub(r"{\\+an8}", "", conversation_text)
+                conversation_text = re.sub(r"{\\+an\d}", "", conversation_text)
+                conversation_text = re.sub(r"\n", " ", conversation_text)
                 formatted_subtitles[conversation_id] = {'start': convert_seconds_to_stamp(conversation_start),
                                                         'end': convert_seconds_to_stamp(prev_end_time.total_seconds()),
                                                         'plain_text': conversation_text}

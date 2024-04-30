@@ -5,7 +5,6 @@ import os
 from dotenv import load_dotenv
 from backend.retrieve_embeddings import WANTED_LANGUAGES
 
-
 load_dotenv()
 
 
@@ -61,6 +60,7 @@ def create_tables(conn):
             EpisodeID VARCHAR(255),
             PlainText TEXT NOT NULL,
             Embedding vector({vector_length}) NOT NULL,
+            Part INT,
             TVShowID INT,
             AnimeID INT,
             MovieID INT,
@@ -76,6 +76,7 @@ def create_tables(conn):
             Timestamp VARCHAR(255) NOT NULL,
             PlainText TEXT NOT NULL,
             Embedding vector({vector_length}) NOT NULL,
+            Part INT,
             TVShowID INT,
             AnimeID INT,
             MovieID INT,
@@ -113,18 +114,19 @@ def insert_into_table(conn, table_name, table_type, data):
         if table_type == "descriptions":
             cursor.execute(
                 f"""
-                INSERT INTO Descriptions (EpisodeID, PlainText, Embedding, {table_name_single}ID)
-                VALUES (%s, %s, %s, %s)
+                INSERT INTO Descriptions (EpisodeID, PlainText, Embedding, Part, {table_name_single}ID)
+                VALUES (%s, %s, %s, %s, %s)
                 """,
-                (data['episode_id'], data['plain_text'], str_embedding, show_id)
+                (data['episode_id'], data['plain_text'], str_embedding, data['part'], show_id)
             )
         elif table_type == "subtitles":
             cursor.execute(
                 f"""
-                INSERT INTO Subtitles (EpisodeID, Language, Timestamp, PlainText, Embedding, {table_name_single}ID)
-                VALUES (%s, %s, %s, %s, %s, %s)
+                INSERT INTO Subtitles (EpisodeID, Language, Timestamp, PlainText, Embedding, Part, {table_name_single}ID)
+                VALUES (%s, %s, %s, %s, %s, %s, %s)
                 """,
-                (data['episode_id'], data['language'], data['timestamp'], data['plain_text'], str_embedding, show_id)
+                (data['episode_id'], data['language'], data['timestamp'], data['plain_text'],
+                 str_embedding, data['part'], show_id)
             )
     conn.commit()
 
@@ -142,20 +144,25 @@ def query_description(conn: psycopg2.connect, query: np.ndarray, show: str = Non
     season = season + "%" if season else ""
 
     sql_string = f"""
-            SELECT t.Title, d.EpisodeID, d.PlainText, d.Embedding
+    WITH TopDescriptions AS (
+            SELECT t.Title, d.EpisodeID, d.Part, d.animeid
             FROM {table} AS t
             JOIN Descriptions AS d ON t.{id_name} = d.{id_name}
             {where_title}
             {season_sql}
             ORDER BY d.Embedding <=> %s
             LIMIT %s OFFSET %s
-            """
+            )
+    SELECT td.Title, d.EpisodeID, d.PlainText, d.Embedding, d.Part
+    FROM Descriptions AS d
+    JOIN TopDescriptions AS td ON d.{id_name} = td.{id_name} AND d.EpisodeID = td.EpisodeID
+    """
     # Parameters for the query
     params = [x for x in [show, season, str_embedding, limit, offset] if x not in [None, ""]]
 
     with conn.cursor() as cursor:
-        cursor.execute(sql_string, [x for x in params if x])
-        return cursor.fetchall()
+        cursor.execute(sql_string, params)
+        return list(set(cursor.fetchall()))
 
 
 def query_subtitle(conn: psycopg2.connect, query: np.ndarray, show: str = None,
@@ -171,7 +178,8 @@ def query_subtitle(conn: psycopg2.connect, query: np.ndarray, show: str = None,
     season_sql = f"{and_or_where} d.EpisodeID LIKE %s" if season else ""
     season = season + "%" if season else ""
     sql_string = f"""
-            SELECT t.Title, d.EpisodeID, d.Language, d.Timestamp, d.PlainText, d.Embedding
+    WITH TopSubtitles AS (
+            SELECT t.Title, d.EpisodeID, d.Language, d.Timestamp, d.PlainText, d.Embedding, d.part, d.animeid
             FROM {table} AS t
             JOIN Subtitles AS d ON t.{table_id} = d.{table_id}
             {where_title}
@@ -179,6 +187,10 @@ def query_subtitle(conn: psycopg2.connect, query: np.ndarray, show: str = None,
             {season_sql}
             ORDER BY d.Embedding <=> %s
             LIMIT %s OFFSET %s
+            )
+    SELECT td.Title, d.EpisodeID, d.Language, d.Timestamp, d.PlainText, d.Embedding, d.part
+    FROM Subtitles AS d
+    JOIN TopSubtitles AS td ON d.{table_id} = td.{table_id} AND d.timestamp = td.timestamp AND d.EpisodeID = td.EpisodeID
             """
 
     # Parameters for the query
@@ -186,7 +198,7 @@ def query_subtitle(conn: psycopg2.connect, query: np.ndarray, show: str = None,
     try:
         with conn.cursor() as cursor:
             cursor.execute(sql_string, params)
-            return cursor.fetchall()
+            return list(set(cursor.fetchall()))
     except Exception as e:
         print(e)
         return []
@@ -198,17 +210,6 @@ def remove_table(conn, table_name: str):
             """
             DROP TABLE IF EXISTS {}
             """.format(table_name)
-        )
-    conn.commit()
-
-
-def remove_show(conn, show_name: str):
-    with conn.cursor() as cursor:
-        cursor.execute(
-            """
-            DELETE FROM Descriptions subtitles WHERE show_name = %s
-            """,
-            (show_name,)
         )
     conn.commit()
 
