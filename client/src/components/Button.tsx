@@ -3,9 +3,8 @@ import { FunctionComponent } from "preact"
 import { VariantProps, cva } from "class-variance-authority"
 
 import { cn } from "../utils/cn"
-import { focusRing } from "../utils/styles"
 
-const button = cva(["inline-flex h-10 items-center rounded px-3", focusRing], {
+const button = cva("inline-flex h-10 items-center rounded px-3", {
   variants: {
     kind: {
       key: "text-text-surface bgl-base-background-highlight hover:bgl-layer-b/10 focus-visible:bgl-layer-b/10 active:bgl-layer-b/20",
