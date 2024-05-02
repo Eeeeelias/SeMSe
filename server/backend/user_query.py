@@ -5,48 +5,55 @@ from backend import database_functions as dbf
 import re
 
 
-def combine_parts(query_result, title, episode_id, timestamp=None):
+def combine_parts(query_result, title, episode_id, embedded_query, timestamp=None):
     query_result.sort(key=lambda x: x[-1] if x[-1] is not None else 0)
 
-    combined_text = ""
+    combined_text = []
     embeddings = []
     for k in query_result:
         if k[0] == title and k[1] == episode_id and (timestamp is None or k[3] == timestamp):
-            # TODO: calculate similarity between parts, and highlight the one part with the highest similarity
-            combined_text += k[4] + "<br>"
+            combined_text.append(k[4] + " ")
             embeddings.append(eval(k[-2]))
-    return combined_text, embeddings
+
+    similarities = [compute_cosine_similarity(embed, embedded_query) for embed in embeddings]
+    highest_index = similarities.index(max(similarities))
+    best_match = combined_text[highest_index] if combined_text[highest_index] else None
+    combined_text = " ".join(combined_text)
+
+    return combined_text, best_match, similarities
 
 
-def combine_multi_part_query(query_result: list, type=None) -> list:
+def combine_multi_part_query(query_result: list, embedded_query, type=None) -> list:
     combined = []
     if not any(q[-1] is not None for q in query_result):
         # eval q[-2] to make sure it's always of the correct datatype
-        try:
-            return [[value if i != (len(sublist) - 2) else [eval(value)] for i, value in enumerate(sublist)]
-                    for sublist in query_result]
-        except Exception as e:
-            print(e)
-            return []
+        query_formatted = []
+        for result in query_result:
+            computed = list(result)
+            similarity = compute_cosine_similarity(eval(result[-2]), embedded_query)
+            computed[-2] = [similarity]
+            computed.insert(-2, None)
+            query_formatted.append(computed)
+        return query_formatted
 
     if type == 'conversation':
         for q in query_result:
             title, episode_id, language, timestamp, text, embedding, part = q
             if part is None:
-                embedding = eval(embedding)
-                combined.append((title, episode_id, language, timestamp, text, [embedding], None))
+                similarity = compute_cosine_similarity(eval(embedding), embedded_query)
+                combined.append((title, episode_id, language, timestamp, text, None, [similarity], None))
             elif part == 0:
-                combined_text, embeddings = combine_parts(query_result, title, episode_id, timestamp)
-                combined.append((title, episode_id, language, timestamp, combined_text, embeddings, None))
+                combined_text, best_match, similarities = combine_parts(query_result, title, episode_id, embedded_query, timestamp)
+                combined.append((title, episode_id, language, timestamp, combined_text, best_match, similarities, None))
     elif type == 'description':
         for q in query_result:
             title, episode_id, text, embedding, part = q
             if part is None:
-                embedding = eval(embedding)
-                combined.append((title, episode_id, text, [embedding], None))
+                similarity = compute_cosine_similarity(eval(embedding), embedded_query)
+                combined.append((title, episode_id, text, None, [similarity], None))
             else:
-                combined_text, embeddings = combine_parts(query_result, title, episode_id)
-                combined.append((title, episode_id, combined_text, embeddings, None))
+                combined_text, best_match, similarities = combine_parts(query_result, title, episode_id, embedded_query)
+                combined.append((title, episode_id, combined_text, best_match, similarities, None))
     return combined
 
 
@@ -86,15 +93,15 @@ def subtitle_query(conn, embed_query: np.ndarray, show: str = None,
                    table: str = None, language: str = 'English', limit=5, offset=0, season=None):
 
     results_sub = dbf.query_subtitle(conn, embed_query, show, table, language, limit, offset, season)
-    results_sub = combine_multi_part_query(results_sub, 'conversation')
+    results_sub = combine_multi_part_query(results_sub, embed_query, 'conversation')
     results = {}
     for idx, result in enumerate(results_sub):
-        title, episode_id, _, timestamp, text, embeddings, _ = result
+        title, episode_id, _, timestamp, text, best_match, embeddings, _ = result
         # idea: maybe retrieve file path of image from here and send it to frontend
-        similarity = max([compute_cosine_similarity(x, embed_query) for x in embeddings])
+        similarity = max(embeddings)
         offset = int(offset)
-        results[idx + offset] = {'title': title, 'episode_id': format_episode_id(episode_id), 'timestamp': timestamp,
-                                 'text': text, 'similarity': similarity, 'type': 'conversation'}
+        results[idx + offset] = {'title': title, 'episodeId': format_episode_id(episode_id), 'timestamp': timestamp,
+                                 'text': text, 'exactMatch': best_match, 'similarity': similarity, 'type': 'conversation'}
     return results
 
 
@@ -102,12 +109,12 @@ def description_query(conn, embed_query: np.ndarray, show: str = None,
                       table: str = None, ex=0, limit=5, offset=0, season=None):
 
     results_desc = dbf.query_description(conn, embed_query, show, table, limit, offset, season)
-    results_desc = combine_multi_part_query(results_desc, 'description')
+    results_desc = combine_multi_part_query(results_desc, embed_query, 'description')
     results = {}
     for idx, result in enumerate(results_desc):
-        title, episode_id, text, embeddings, _ = result
-        similarity = max([compute_cosine_similarity(x, embed_query) for x in embeddings])
+        title, episode_id, text, best_match, embeddings, _ = result
+        similarity = max(embeddings)
         offset = int(offset)
-        results[idx + ex + offset] = {'title': title, 'episode_id': format_episode_id(episode_id), 'text': text,
-                                      'similarity': similarity, 'type': 'description'}
+        results[idx + ex + offset] = {'title': title, 'episodeId': format_episode_id(episode_id), 'text': text,
+                                      'exactMatch': best_match, 'similarity': similarity, 'type': 'description'}
     return results

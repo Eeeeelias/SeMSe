@@ -43,7 +43,7 @@ def query_media(request):
 
     print(
         f"Finding media with query: {params['query']}, show: {params['show']}, table: {params['table']}, "
-        f"type: {params['type']}, offset: {params['offset']}")
+        f"type: {params['type']}, offset: {params['offset']}", end=" ")
 
     try:
         query_result = uq.query_db(**params)
@@ -51,6 +51,7 @@ def query_media(request):
         print(e)
         query_result = {'error': 'there was an error fetching the results from the database'}
         return JsonResponse(query_result, status=501)
+    print(f"... found {len(query_result)} entries")
     return JsonResponse(query_result)
 
 
