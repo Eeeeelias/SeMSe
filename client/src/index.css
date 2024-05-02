@@ -8,6 +8,9 @@
   :root {
     @apply bg-background-page;
     @apply text-text;
+    @apply font-medium;
+    @apply selection:bg-background-highlight;
+    @apply selection:text-black;
   }
 
   html, body, #app {
