@@ -3,6 +3,7 @@ import typographyPlugin from "@tailwindcss/typography"
 import { Config } from "tailwindcss"
 import { fontFamily } from "tailwindcss/defaultTheme"
 
+import { bgLayerPlugin } from "./bgLayerPlugin"
 import { colors } from "./colors"
 
 export default {
@@ -14,5 +15,5 @@ export default {
     },
     colors,
   },
-  plugins: [typographyPlugin()],
+  plugins: [typographyPlugin(), bgLayerPlugin()],
 } satisfies Config
