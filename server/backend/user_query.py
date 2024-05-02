@@ -12,7 +12,8 @@ def combine_parts(query_result, title, episode_id, timestamp=None):
     embeddings = []
     for k in query_result:
         if k[0] == title and k[1] == episode_id and (timestamp is None or k[3] == timestamp):
-            combined_text += k[4] + " "
+            # TODO: calculate similarity between parts, and highlight the one part with the highest similarity
+            combined_text += k[4] + "<br>"
             embeddings.append(eval(k[-2]))
     return combined_text, embeddings
 
@@ -20,7 +21,13 @@ def combine_parts(query_result, title, episode_id, timestamp=None):
 def combine_multi_part_query(query_result: list, type=None) -> list:
     combined = []
     if not any(q[-1] is not None for q in query_result):
-        return query_result
+        # eval q[-2] to make sure it's always of the correct datatype
+        try:
+            return [[value if i != (len(sublist) - 2) else [eval(value)] for i, value in enumerate(sublist)]
+                    for sublist in query_result]
+        except Exception as e:
+            print(e)
+            return []
 
     if type == 'conversation':
         for q in query_result:
@@ -83,6 +90,7 @@ def subtitle_query(conn, embed_query: np.ndarray, show: str = None,
     results = {}
     for idx, result in enumerate(results_sub):
         title, episode_id, _, timestamp, text, embeddings, _ = result
+        # idea: maybe retrieve file path of image from here and send it to frontend
         similarity = max([compute_cosine_similarity(x, embed_query) for x in embeddings])
         offset = int(offset)
         results[idx + offset] = {'title': title, 'episode_id': format_episode_id(episode_id), 'timestamp': timestamp,
@@ -97,8 +105,8 @@ def description_query(conn, embed_query: np.ndarray, show: str = None,
     results_desc = combine_multi_part_query(results_desc, 'description')
     results = {}
     for idx, result in enumerate(results_desc):
-        title, episode_id, text, embedding, _ = result
-        similarity = compute_cosine_similarity(embed_query, eval(embedding))
+        title, episode_id, text, embeddings, _ = result
+        similarity = max([compute_cosine_similarity(x, embed_query) for x in embeddings])
         offset = int(offset)
         results[idx + ex + offset] = {'title': title, 'episode_id': format_episode_id(episode_id), 'text': text,
                                       'similarity': similarity, 'type': 'description'}

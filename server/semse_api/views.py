@@ -1,8 +1,10 @@
 from django.http import JsonResponse, HttpResponse
 from django.shortcuts import render, redirect
 from django.views.decorators.csrf import ensure_csrf_cookie
+from wsgiref.util import FileWrapper
 import backend.database_functions as dbf
 import backend.user_query as uq
+import os
 
 # put in all api calls here
 
@@ -43,7 +45,12 @@ def query_media(request):
         f"Finding media with query: {params['query']}, show: {params['show']}, table: {params['table']}, "
         f"type: {params['type']}, offset: {params['offset']}")
 
-    query_result = uq.query_db(**params)
+    try:
+        query_result = uq.query_db(**params)
+    except Exception as e:
+        print(e)
+        query_result = {'error': 'there was an error fetching the results from the database'}
+        return JsonResponse(query_result, status=501)
     return JsonResponse(query_result)
 
 
@@ -59,3 +66,18 @@ def get_media_size(request):
     print("Got request for media size")
     conn = dbf.get_conn()
     return JsonResponse(dbf.size_of_db(conn))
+
+
+def serve_image(request):
+    image_path = '/media/Anime/Yuru Camp/folder.jpg'
+
+    if os.path.exists(image_path):
+        with open(image_path, 'rb') as image_file:
+            # Set the content type
+            content_type = 'image/jpeg'
+            response = HttpResponse(FileWrapper(image_file), content_type=content_type)
+            response['Content-Length'] = os.path.getsize(image_path)
+            return response
+    else:
+        print("Could not find file")
+        return HttpResponse("Image not found", status=404)

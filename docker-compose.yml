@@ -1,7 +1,7 @@
 version: "3"
 services:
     pgvecto-rs:
-        container_name: semantic_search_db
+        container_name: semse-db
         env_file:
             -   .env
         volumes:
@@ -11,7 +11,7 @@ services:
         image: tensorchord/pgvecto-rs:pg16-v0.2.1
 
     semse-api:
-        build: ./semse
+        build: server
         command: > #             python setup_db.py &
             bash -c "
             python setup_db.py &
@@ -23,7 +23,7 @@ services:
         ports:
             - "8822:8000"
         volumes:
-            - ./semse:/app
+            - ./server:/app
             - "/mnt/MediaFiles/MediaFiles:/media"
         networks:
             - semse_db_net

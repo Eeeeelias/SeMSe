@@ -11,7 +11,7 @@ load_dotenv()
 # connect to postgres
 def get_conn():
     conn = psycopg2.connect(
-        host="semantic_search_db",
+        host="semse-db",
         database="postgres",
         user=os.getenv('POSTGRES_USER'),
         password=os.getenv('POSTGRES_PASSWORD'),
@@ -145,7 +145,7 @@ def query_description(conn: psycopg2.connect, query: np.ndarray, show: str = Non
 
     sql_string = f"""
     WITH TopDescriptions AS (
-            SELECT t.Title, d.EpisodeID, d.Part, d.animeid
+            SELECT t.Title, d.EpisodeID, d.Part, d.{id_name}
             FROM {table} AS t
             JOIN Descriptions AS d ON t.{id_name} = d.{id_name}
             {where_title}
@@ -179,7 +179,7 @@ def query_subtitle(conn: psycopg2.connect, query: np.ndarray, show: str = None,
     season = season + "%" if season else ""
     sql_string = f"""
     WITH TopSubtitles AS (
-            SELECT t.Title, d.EpisodeID, d.Language, d.Timestamp, d.PlainText, d.Embedding, d.part, d.animeid
+            SELECT t.Title, d.EpisodeID, d.Language, d.Timestamp, d.PlainText, d.Embedding, d.part, d.{table_id}
             FROM {table} AS t
             JOIN Subtitles AS d ON t.{table_id} = d.{table_id}
             {where_title}
