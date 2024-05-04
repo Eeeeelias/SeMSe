@@ -7,6 +7,13 @@ export const App = () => {
         <h1 className="text-text-gentle text-8xl font-bold">SeMSe</h1>
         <b className="text-text-gentle/50">Se[mantic]M[edia]Se[arch]</b>
       </div>
+
+      <p className="mx-auto mb-10 max-w-prose text-left">
+        SeMSe is an application to find an episode among multiple TV shows. Run
+        a query against the descriptions and conversations of episodes to find
+        the best match.
+      </p>
+
       <Button>Click!</Button>
     </div>
   )
