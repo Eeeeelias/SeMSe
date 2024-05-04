@@ -1,8 +1,4 @@
-import { ComponentChildren, Ref } from "preact"
-
-export interface RefProp<T extends Element> {
-  ref?: Ref<T>
-}
+import { ComponentChildren } from "preact"
 
 export interface ChildrenProp {
   children?: ComponentChildren

@@ -1,11 +1,8 @@
 import { cn } from "../../utils/cn"
 import { focusRing, hstack } from "../../utils/styles"
-import { ChildrenProp, ClassNameProp, RefProp } from "../base/BaseProps"
+import { ChildrenProp, ClassNameProp } from "../base/BaseProps"
 
-export interface InputBorderProps
-  extends ClassNameProp,
-    ChildrenProp,
-    RefProp<HTMLLabelElement> {
+export interface InputBorderProps extends ClassNameProp, ChildrenProp {
   label: string
 }
 

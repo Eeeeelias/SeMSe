@@ -1,15 +1,27 @@
-import { Ref } from "preact"
+import { Ref, RefCallback } from "preact"
 
-export const mergeRefs = <T extends Element>(
+import { useMemo } from "preact/hooks"
+
+export const mergeRefs = <T>(
   ...refs: (Ref<T> | undefined | null)[]
-): Ref<T> => {
-  return element => {
+): RefCallback<T> | undefined => {
+  if (refs.every(ref => ref == null)) {
+    return
+  }
+
+  return value => {
     refs.forEach(ref => {
       if (typeof ref === "function") {
-        ref(element)
-      } else if (ref) {
-        ref.current = element
+        ref(value)
+      } else if (ref != null) {
+        ref.current = value
       }
     })
   }
 }
+
+export const useMergeRefs = <T>(
+  refs: (Ref<T> | undefined | null)[]
+): RefCallback<T> | undefined =>
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  useMemo(() => mergeRefs(...refs), refs)

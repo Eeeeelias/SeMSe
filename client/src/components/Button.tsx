@@ -1,6 +1,7 @@
 import { VariantProps, cva } from "class-variance-authority"
+import { forwardRef } from "preact/compat"
 
-import { ChildrenProp, ClassNameProp, RefProp } from "./base/BaseProps"
+import { ChildrenProp, ClassNameProp } from "./base/BaseProps"
 import { cn } from "../utils/cn"
 
 const button = cva(
@@ -23,18 +24,19 @@ const button = cva(
 interface ButtonProps
   extends VariantProps<typeof button>,
     ClassNameProp,
-    ChildrenProp,
-    RefProp<HTMLButtonElement> {
+    ChildrenProp {
   onClick?: () => void
 }
 
-export const Button = ({
-  children,
-  kind,
-  className,
-  ...delegated
-}: ButtonProps) => (
-  <button className={cn(button({ kind }), className)} {...delegated}>
-    {children}
-  </button>
+export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
+  ({ children, kind, className, ...delegated }, ref) => (
+    <button
+      ref={ref}
+      className={cn(button({ kind }), className)}
+      {...delegated}
+    >
+      {children}
+    </button>
+  )
 )
+Button.displayName = "Button"
