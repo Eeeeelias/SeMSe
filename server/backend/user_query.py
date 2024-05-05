@@ -2,6 +2,7 @@
 import numpy as np
 from backend.retrieve_embeddings import encode_text, compute_cosine_similarity
 from backend import database_functions as dbf
+from backend.retrieve_images import map_image
 import re
 
 
@@ -98,10 +99,12 @@ def subtitle_query(conn, embed_query: np.ndarray, show: str = None,
     for idx, result in enumerate(results_sub):
         title, episode_id, _, timestamp, text, best_match, embeddings, _ = result
         # idea: maybe retrieve file path of image from here and send it to frontend
+        image_uuid = map_image(title, episode_id, table)
         similarity = max(embeddings)
         offset = int(offset)
         results[idx + offset] = {'title': title, 'episodeId': format_episode_id(episode_id), 'timestamp': timestamp,
-                                 'text': text, 'exactMatch': best_match, 'similarity': similarity, 'type': 'conversation'}
+                                 'text': text, 'exactMatch': best_match, 'similarity': similarity,
+                                 'type': 'conversation', 'imageId': image_uuid}
     return results
 
 
@@ -113,8 +116,10 @@ def description_query(conn, embed_query: np.ndarray, show: str = None,
     results = {}
     for idx, result in enumerate(results_desc):
         title, episode_id, text, best_match, embeddings, _ = result
+        image_uuid = map_image(title, episode_id, table)
         similarity = max(embeddings)
         offset = int(offset)
         results[idx + ex + offset] = {'title': title, 'episodeId': format_episode_id(episode_id), 'text': text,
-                                      'exactMatch': best_match, 'similarity': similarity, 'type': 'description'}
+                                      'exactMatch': best_match, 'similarity': similarity, 'type': 'description',
+                                      'imageId': image_uuid}
     return results

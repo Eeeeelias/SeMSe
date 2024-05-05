@@ -29,8 +29,6 @@ def add_media_to_db(conn, path: str, table_name):
 
 def fill_database():
     conn = dbf.get_conn()
-    # remove_table(conn, "descriptions")
-    # remove_table(conn, "subtitles")
     dbf.init_db(conn)
     # go through all shows in the TV Shows directory and add them to the database
     dir_types = os.listdir("/media")

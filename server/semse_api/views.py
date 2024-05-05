@@ -69,14 +69,16 @@ def get_media_size(request):
     return JsonResponse(dbf.size_of_db(conn))
 
 
-def serve_image(request):
-    image_path = '/media/Anime/Yuru Camp/folder.jpg'
+def serve_image(request, uuid):
+    conn = dbf.get_conn()
+
+    image_path = dbf.query_images(conn, uuid=uuid)[0]
 
     if os.path.exists(image_path):
         with open(image_path, 'rb') as image_file:
             # Set the content type
             content_type = 'image/jpeg'
-            response = HttpResponse(FileWrapper(image_file), content_type=content_type)
+            response = HttpResponse(image_file.read(), content_type=content_type)
             response['Content-Length'] = os.path.getsize(image_path)
             return response
     else:

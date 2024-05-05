@@ -84,6 +84,11 @@ def create_tables(conn):
             FOREIGN KEY (AnimeID) REFERENCES Animes(AnimeID),
             FOREIGN KEY (MovieID) REFERENCES Movies(MovieID)
             );
+            
+            CREATE TABLE IF NOT EXISTS ImageMappings (
+            ImageMappingID UUID PRIMARY KEY,
+            ImagePath TEXT NOT NULL
+            );
             """
         )
         cursor.execute(
@@ -129,6 +134,19 @@ def insert_into_table(conn, table_name, table_type, data):
                  str_embedding, data['part'], show_id)
             )
     conn.commit()
+
+
+def insert_into_images(conn, file_path):
+    uuid = str(uuid4())
+    with conn.cursor() as cursor:
+        cursor.execute(
+            """
+            INSERT INTO ImageMappings (ImageMappingID, ImagePath) VALUES (%s, %s)
+            """,
+            (uuid, file_path)
+        )
+    conn.commit()
+    return uuid
 
 
 def query_description(conn: psycopg2.connect, query: np.ndarray, show: str = None,
@@ -202,6 +220,23 @@ def query_subtitle(conn: psycopg2.connect, query: np.ndarray, show: str = None,
     except Exception as e:
         print(e)
         return []
+
+
+def query_images(conn: psycopg2.connect, uuid: str = None, file_path: str = None):
+    if uuid:
+        sql = """
+        SELECT ImagePath FROM ImageMappings WHERE ImageMappingID = %s
+        """
+        input_value = uuid
+    else:
+        sql = """
+        Select ImageMappingID FROM ImageMappings WHERE ImagePath = %s
+        """
+        input_value = file_path
+
+    with conn.cursor() as cursor:
+        cursor.execute(sql, (input_value,))
+        return cursor.fetchone()
 
 
 def remove_table(conn, table_name: str):
