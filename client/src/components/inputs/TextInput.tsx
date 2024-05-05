@@ -31,7 +31,7 @@ export const TextInput = forwardRef<HTMLInputElement, TextInputProps>(
     }, [placeholder, text, internalRef])
 
     return (
-      <InputBorder label={label}>
+      <InputBorder label={label} className="cursor-text">
         <input
           ref={ref}
           type="text"
