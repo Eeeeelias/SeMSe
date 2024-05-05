@@ -199,9 +199,8 @@ export const Content = ({
         >
           <div
             className={cn([
-              surface({ bg: "glassy" }),
+              surface({ bg: "glassy", shade: "medium" }),
               transition({ side, open: status === "open" }),
-              "shade-medium",
               className,
             ])}
           >

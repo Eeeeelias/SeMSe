@@ -67,9 +67,15 @@ export const surface = cva("text-text border backdrop-blur", {
       md: "rounded-md",
       lg: "rounded-lg",
     },
+    shade: {
+      low: "shade-low",
+      medium: "shade-medium",
+      high: "shade-high",
+    },
   },
   defaultVariants: {
     bg: "medium",
     round: "md",
+    shade: "low",
   },
 })
