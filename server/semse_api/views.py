@@ -12,14 +12,28 @@ import os
 def get_all_media(request):
     print("Got request for all media")
     conn = dbf.get_conn()
-    all_media = {table: get_media_dict(dbf.get_existing_media(table, conn))
-                 for table in ['Animes', 'Movies', 'TVShows']}
+    try:
+        all_media = {table: get_media_dict(dbf.get_existing_media(table, conn))
+                     for table in ['Animes', 'Movies', 'TVShows']}
+    except Exception as e:
+        print(e)
+        all_media = {'error': 'there was an error fetching the results from the database'}
+        return JsonResponse(all_media, status=501)
     return JsonResponse(all_media)
 
 
 def get_media_dict(media):
-    unique_season = {(show[0], show[1].upper().split("E")[0]) for show in media}
-    return {season[0]: set([s[1] for s in unique_season if s[0] == season[0]]) for season in unique_season}
+    # split episode_id from s01e01 to just 1
+    unique_season = set()
+    for show in media:
+        name = show[0]
+        try:
+            season = int(show[1].upper().split("E")[0][1:])
+        except ValueError:
+            season = None
+        unique_season.add((name, season))
+
+    return {season[0]: [s[1] for s in unique_season if s[0] == season[0]] for season in unique_season}
 
 
 def query_media(request):
