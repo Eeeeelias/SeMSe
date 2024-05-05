@@ -7,7 +7,7 @@ import { meassureText } from "../../utils/meassureText"
 import { useMergeRefs } from "../../utils/mergeRefs"
 import { ClassNameProp } from "../base/BaseProps"
 
-interface TextInputProps
+export interface TextInputProps
   extends Pick<InputBorderProps, "label" | "alert">,
     ClassNameProp {
   value?: string
@@ -15,11 +15,21 @@ interface TextInputProps
   onChange?: Dispatch<string>
   onBlur?: () => void
   onFocus?: () => void
+  isValid?: (value: string) => boolean
 }
 
 export const TextInput = forwardRef<HTMLInputElement, TextInputProps>(
   (
-    { className, value, placeholder = "", onChange, ...labelProps },
+    {
+      className,
+      value,
+      placeholder = "",
+      onChange,
+      onBlur,
+      onFocus,
+      isValid,
+      ...labelProps
+    },
     externalRef
   ) => {
     const [text, setText] = useState(value ?? "")
@@ -41,15 +51,23 @@ export const TextInput = forwardRef<HTMLInputElement, TextInputProps>(
           ref={ref}
           type="text"
           className={cn(
-            "text-text-priority placeholder:text-text-gentle/75 h-full min-w-[5ch] max-w-[30ch] rounded bg-transparent outline-none",
+            "text-text-priority placeholder:text-text-gentle/50 h-full min-w-[5ch] max-w-[30ch] rounded bg-transparent outline-none",
             className
           )}
-          value={value}
+          value={text}
           placeholder={placeholder}
-          onInput={({ currentTarget }) => {
-            setText(currentTarget.value)
-            onChange?.(currentTarget.value)
+          onInput={event => {
+            const value = event.currentTarget.value
+            if (isValid && !isValid(value)) {
+              event.currentTarget.value = text
+              return
+            }
+
+            setText(value)
+            onChange?.(value)
           }}
+          onBlur={onBlur}
+          onFocus={onFocus}
           style={{ width }}
         />
       </InputBorder>
