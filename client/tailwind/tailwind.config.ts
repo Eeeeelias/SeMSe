@@ -5,6 +5,7 @@ import { fontFamily } from "tailwindcss/defaultTheme"
 
 import { bgLayerPlugin } from "./bgLayerPlugin"
 import { colors } from "./colors"
+import { shadowPlugin } from "./shadowPlugin"
 
 export default {
   content: ["./src/**/*.{ts,tsx}"],
@@ -14,6 +15,10 @@ export default {
       body: ["Quicksand", ...fontFamily.sans],
     },
     colors,
+
+    // Remove default box shadows
+    boxShadow: {},
+    boxShadowColor: {},
   },
-  plugins: [typographyPlugin(), bgLayerPlugin()],
+  plugins: [typographyPlugin(), bgLayerPlugin(), shadowPlugin()],
 } satisfies Config
