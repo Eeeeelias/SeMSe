@@ -4,22 +4,29 @@ import { forwardRef } from "preact/compat"
 import { ChildrenProp, ClassNameProp } from "./base/BaseProps"
 import { cn } from "../utils/cn"
 
-const button = cva(
-  "inline-flex h-10 items-center gap-2 whitespace-nowrap rounded px-3",
-  {
-    variants: {
-      kind: {
-        key: "text-text-surface bgl-base-background-highlight hover:bgl-layer-b/10 focus-visible:bgl-layer-b/10 active:bgl-layer-b/20",
-        ghost:
-          "text-text bgl-base-transparent hover:bgl-layer-w/5 focus-visible:bgl-layer-w/5 active:bgl-layer-w/10 border-text-muted border",
-        flat: "text-text bgl-base-transparent hover:bgl-layer-w/5 focus-visible:bgl-layer-w/5 active:bgl-layer-w/10",
-      },
+const button = cva("inline-flex items-center truncate whitespace-nowrap", {
+  variants: {
+    kind: {
+      key: "text-text-surface bgl-base-background-surface hover:bgl-layer-b/10 focus-visible:bgl-layer-b/10 active:bgl-layer-b/20",
+      ghost:
+        "text-text bgl-base-transparent hover:bgl-layer-w/5 focus-visible:bgl-layer-w/5 active:bgl-layer-w/10 border-text-muted border",
+      flat: "text-text bgl-base-transparent hover:bgl-layer-w/5 focus-visible:bgl-layer-w/5 active:bgl-layer-w/10",
     },
-    defaultVariants: {
-      kind: "flat",
+    round: {
+      true: "rounded-full",
+      false: "rounded",
     },
-  }
-)
+    size: {
+      default: "h-10 gap-2 px-3",
+      icon: "size-10 shrink-0 items-center justify-center",
+    },
+  },
+  defaultVariants: {
+    kind: "flat",
+    round: false,
+    size: "default",
+  },
+})
 
 interface ButtonProps
   extends VariantProps<typeof button>,
@@ -29,10 +36,10 @@ interface ButtonProps
 }
 
 export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
-  ({ children, kind, className, ...delegated }, ref) => (
+  ({ children, kind, round, size, className, ...delegated }, ref) => (
     <button
       ref={ref}
-      className={cn(button({ kind }), className)}
+      className={cn(button({ kind, round, size }), className)}
       {...delegated}
     >
       {children}
