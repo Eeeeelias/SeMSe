@@ -1,4 +1,14 @@
-import { Button } from "./components/Button"
+import { glob } from "goober/global"
+
+import * as patterns from "./utils/patterns"
+
+glob`
+  :root {
+    background-image: ${patterns.wiggle};
+    background-position: center;
+    background-size: 6rem;
+  }
+`
 
 export const App = () => {
   return (
