@@ -10,6 +10,7 @@
     "lint": "eslint ./src ./tailwind --ext .ts,.tsx --fix"
   },
   "dependencies": {
+    "@floating-ui/react": "^0.26.13",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.1",
     "goober": "^2.1.14",
@@ -33,7 +34,14 @@
       "@pretty-cozy/eslint-config/tailwind"
     ],
     "rules": {
-      "import/no-unresolved": [2, { "ignore": ["\\.svg$"] }]
+      "import/no-unresolved": [
+        2,
+        {
+          "ignore": [
+            "\\.svg$"
+          ]
+        }
+      ]
     }
   }
 }
