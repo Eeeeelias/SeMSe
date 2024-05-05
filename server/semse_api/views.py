@@ -2,6 +2,8 @@ from django.http import JsonResponse, HttpResponse
 from django.shortcuts import render, redirect
 from django.views.decorators.csrf import ensure_csrf_cookie
 from wsgiref.util import FileWrapper
+from PIL import Image as PILImage
+import io
 import backend.database_functions as dbf
 import backend.user_query as uq
 import os
@@ -90,14 +92,31 @@ def serve_image(request, uuid):
     conn = dbf.get_conn()
 
     image_path = dbf.query_images(conn, uuid=uuid)[0]
+    width = 300
 
     if os.path.exists(image_path):
         with open(image_path, 'rb') as image_file:
-            # Set the content type
-            content_type = 'image/jpeg'
-            response = HttpResponse(image_file.read(), content_type=content_type)
-            response['Content-Length'] = os.path.getsize(image_path)
-            return response
+            try:
+                image = PILImage.open(image_file)
+
+                # scale image to 300 px width
+                w_percent = (float(width) / float(image.size[0]))
+                h_size = int((float(image.size[1]) * float(w_percent)))
+                image = image.resize((int(width), h_size))
+
+                # Convert the image to bytes in memory
+                image_buffer = io.BytesIO()
+                image.save(image_buffer, format='JPEG')
+                image_buffer.seek(0)
+
+                # Set the content type
+                content_type = 'image/jpeg'
+                response = HttpResponse(image_buffer.read(), content_type=content_type)
+                response['Content-Length'] = image_buffer.tell()
+                return response
+            except Exception as e:
+                print(e)
+                return HttpResponse("Image could not be converted", status=500)
     else:
         print("Could not find file")
         return HttpResponse("Image not found", status=404)

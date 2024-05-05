@@ -262,7 +262,6 @@ def get_existing_media(table, conn):
         return cursor.fetchall()
 
 
-
 def size_of_db(conn):
     # get the number of rows of each table
     with conn.cursor() as cursor:
