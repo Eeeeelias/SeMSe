@@ -25,20 +25,24 @@ const useMenuList = () => {
 interface ItemProps extends ChildrenProp {
   onClick?: () => void
 }
-const Item = forwardRef<HTMLLIElement, ItemProps>(({ children }, ref) => {
-  const { itemRole } = useMenuList()
-  return (
-    <CompositeItem
-      render={(props: object) => (
-        <li ref={ref} role={itemRole}>
-          <Button {...props} className="w-full">
-            {children}
-          </Button>
-        </li>
-      )}
-    />
-  )
-})
+const Item = forwardRef<HTMLLIElement, ItemProps>(
+  ({ children, onClick }, ref) => {
+    const { itemRole } = useMenuList()
+    return (
+      <CompositeItem
+        render={(props: object) => (
+          <li ref={ref} role={itemRole}>
+            <Slot {...props}>
+              <Button onClick={onClick} className="w-full">
+                {children}
+              </Button>
+            </Slot>
+          </li>
+        )}
+      />
+    )
+  }
+)
 
 interface RootProps extends ChildrenProp {
   role?: MenuRole
