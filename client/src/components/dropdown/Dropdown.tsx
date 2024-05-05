@@ -22,7 +22,7 @@ import { useContext, useMemo, useState } from "preact/hooks"
 
 import { cn } from "../../utils/cn"
 import { useMergeRefs } from "../../utils/mergeRefs"
-import { surface, vstack } from "../../utils/styles"
+import { surface } from "../../utils/styles"
 import { ChildrenProp } from "../base/BaseProps"
 import { Slot } from "../base/Slot"
 
@@ -199,8 +199,7 @@ export const Content = ({
         >
           <div
             className={cn([
-              surface({ bg: "glassy", round: "sm" }),
-              vstack(),
+              surface({ bg: "glassy" }),
               transition({ side, open: status === "open" }),
               "shade-medium",
               className,
@@ -214,17 +213,17 @@ export const Content = ({
   )
 }
 
-export const Close = ({
-  onClick,
-  ...props
-}: JSX.IntrinsicElements["button"]) => {
+interface CloseProps extends ChildrenProp {
+  onClick?: () => void
+}
+
+export const Close = ({ onClick, ...props }: CloseProps) => {
   const { setOpen } = useDropdownContext()
   return (
-    <button
-      type="button"
+    <Slot
       {...props}
-      onClick={event => {
-        onClick?.(event)
+      onClick={() => {
+        onClick?.()
         setOpen(false)
       }}
     />
