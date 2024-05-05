@@ -23,7 +23,7 @@ import { useContext, useMemo, useState } from "preact/hooks"
 import { cn } from "../../utils/cn"
 import { useMergeRefs } from "../../utils/mergeRefs"
 import { surface, vstack } from "../../utils/styles"
-import { AsChildProp, ChildrenProp } from "../base/BaseProps"
+import { ChildrenProp } from "../base/BaseProps"
 import { Slot } from "../base/Slot"
 
 interface DropdownOptions {
@@ -113,22 +113,19 @@ export const Root = ({
   )
 }
 
-type DropdownTriggerProps = ChildrenProp &
-  AsChildProp &
-  JSX.IntrinsicElements["button"]
+type DropdownTriggerProps = ChildrenProp
 
 export const Trigger = forwardRef<HTMLElement, DropdownTriggerProps>(
-  ({ children, asChild = false, ...triggerProps }, ref) => {
+  ({ children, ...triggerProps }, ref) => {
     const context = useDropdownContext()
     const refs = useMergeRefs([context.refs.setReference, ref])
 
     const props = context.getReferenceProps(triggerProps)
 
-    const Element = asChild ? Slot : "button"
     return (
-      <Element ref={refs} {...props}>
+      <Slot ref={refs} {...props}>
         {children}
-      </Element>
+      </Slot>
     )
   }
 )
