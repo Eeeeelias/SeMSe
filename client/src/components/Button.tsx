@@ -28,7 +28,7 @@ const button = cva("inline-flex items-center truncate whitespace-nowrap", {
   },
 })
 
-interface ButtonProps
+export interface ButtonProps
   extends VariantProps<typeof button>,
     ClassNameProp,
     ChildrenProp {
