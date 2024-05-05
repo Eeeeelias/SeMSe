@@ -250,13 +250,17 @@ def remove_table(conn, table_name: str):
 
 
 def get_existing_media(table, conn):
+    # get title of each show as well as all the episode ids
     with conn.cursor() as cursor:
         cursor.execute(
             f"""
-            SELECT DISTINCT Title FROM {table}
+            SELECT t.Title, d.EpisodeID
+            FROM {table} AS t
+            JOIN Descriptions AS d ON t.{table[:-1]}ID = d.{table[:-1]}ID
             """
         )
         return cursor.fetchall()
+
 
 
 def size_of_db(conn):

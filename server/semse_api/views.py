@@ -12,11 +12,14 @@ import os
 def get_all_media(request):
     print("Got request for all media")
     conn = dbf.get_conn()
-    all_media = {}
-    for table in ['Animes', 'Movies', 'TVShows']:
-        media = dbf.get_existing_media(table, conn)
-        all_media[table] = [show[0] for show in media]
+    all_media = {table: get_media_dict(dbf.get_existing_media(table, conn))
+                 for table in ['Animes', 'Movies', 'TVShows']}
     return JsonResponse(all_media)
+
+
+def get_media_dict(media):
+    unique_season = {(show[0], show[1].upper().split("E")[0]) for show in media}
+    return {season[0]: set([s[1] for s in unique_season if s[0] == season[0]]) for season in unique_season}
 
 
 def query_media(request):
