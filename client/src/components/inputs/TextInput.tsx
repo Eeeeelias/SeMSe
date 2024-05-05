@@ -8,15 +8,20 @@ import { useMergeRefs } from "../../utils/mergeRefs"
 import { ClassNameProp } from "../base/BaseProps"
 
 interface TextInputProps
-  extends Pick<InputBorderProps, "label">,
+  extends Pick<InputBorderProps, "label" | "alert">,
     ClassNameProp {
   value?: string
   placeholder?: string
   onChange?: Dispatch<string>
+  onBlur?: () => void
+  onFocus?: () => void
 }
 
 export const TextInput = forwardRef<HTMLInputElement, TextInputProps>(
-  ({ className, label, value, placeholder = "", onChange }, externalRef) => {
+  (
+    { className, value, placeholder = "", onChange, ...labelProps },
+    externalRef
+  ) => {
     const [text, setText] = useState(value ?? "")
     const [internalRef, setInternalRef] = useState<HTMLInputElement | null>(
       null
@@ -31,7 +36,7 @@ export const TextInput = forwardRef<HTMLInputElement, TextInputProps>(
     }, [placeholder, text, internalRef])
 
     return (
-      <InputBorder label={label} className="cursor-text">
+      <InputBorder {...labelProps} className="cursor-text">
         <input
           ref={ref}
           type="text"

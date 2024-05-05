@@ -1,3 +1,6 @@
+/* eslint-disable import/no-extraneous-dependencies */
+import { red, yellow, green, blue } from "tailwindcss/colors"
+
 const colorValues = {
   neutral: {
     1: "#121629",
@@ -27,6 +30,12 @@ const colorTokens = {
     DEFAULT: colorValues.neutral["1"],
     gentle: colorValues.neutral["3"],
     highlight: colorValues.primary,
+  },
+  alert: {
+    error: red[400],
+    warning: yellow[400],
+    info: blue[400],
+    success: green[400],
   },
 }
 
