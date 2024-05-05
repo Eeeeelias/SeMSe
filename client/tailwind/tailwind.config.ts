@@ -19,6 +19,12 @@ export default {
     // Remove default box shadows
     boxShadow: {},
     boxShadowColor: {},
+
+    extend: {
+      transitionTimingFunction: {
+        bounce: "cubic-bezier(.47,1.64,.41,.8)",
+      },
+    },
   },
   plugins: [typographyPlugin(), bgLayerPlugin(), shadowPlugin()],
 } satisfies Config
