@@ -1,11 +1,6 @@
 import { JSX, createContext } from "preact"
 
 import {
-  useFloating,
-  autoUpdate,
-  offset,
-  flip,
-  shift,
   useClick,
   useDismiss,
   useRole,
@@ -18,8 +13,9 @@ import {
 } from "@floating-ui/react"
 import { cva } from "class-variance-authority"
 import { forwardRef } from "preact/compat"
-import { useContext, useMemo, useState } from "preact/hooks"
+import { useContext, useMemo } from "preact/hooks"
 
+import { FloatingOptions, useFloating } from "./useFloating"
 import { cn } from "../../utils/cn"
 import { useMergeRefs } from "../../utils/mergeRefs"
 import { surface } from "../../utils/styles"
@@ -34,53 +30,21 @@ interface DropdownOptions {
   onOpenChange?: (open: boolean) => void
 }
 
-export function useDropdown({
-  initialOpen = false,
-  placement = "bottom",
-  modal,
-  open: controlledOpen,
-  onOpenChange: setControlledOpen,
-}: DropdownOptions = {}) {
-  const [uncontrolledOpen, setUncontrolledOpen] = useState(initialOpen)
+export const useDropdown = (props: FloatingOptions = {}) => {
+  const floating = useFloating({ ...props })
 
-  const open = controlledOpen ?? uncontrolledOpen
-  const setOpen = setControlledOpen ?? setUncontrolledOpen
-
-  const data = useFloating({
-    placement,
-    open,
-    onOpenChange: setOpen,
-    whileElementsMounted: autoUpdate,
-    middleware: [
-      offset(4),
-      flip({
-        crossAxis: placement.includes("-"),
-        fallbackAxisSideDirection: "end",
-        padding: 4,
-      }),
-      shift({ padding: 4 }),
-    ],
-  })
-
-  const context = data.context
-
-  const click = useClick(context, {
-    enabled: controlledOpen == null,
-  })
-  const dismiss = useDismiss(context)
-  const role = useRole(context)
+  const click = useClick(floating.context)
+  const dismiss = useDismiss(floating.context)
+  const role = useRole(floating.context)
 
   const interactions = useInteractions([click, dismiss, role])
 
   return useMemo(
     () => ({
-      open,
-      setOpen,
       ...interactions,
-      ...data,
-      modal,
+      ...floating,
     }),
-    [open, setOpen, interactions, data, modal]
+    [interactions, floating]
   )
 }
 
@@ -216,7 +180,7 @@ interface CloseProps extends ChildrenProp {
   onClick?: () => void
 }
 
-export const Close = ({ onClick, ...props }: CloseProps) => {
+const Close = ({ onClick, ...props }: CloseProps) => {
   const { setOpen } = useDropdownContext()
   return (
     <Slot
@@ -229,9 +193,67 @@ export const Close = ({ onClick, ...props }: CloseProps) => {
   )
 }
 
+const ArrowSvg = ({ side }: { side: Side }) => {
+  const viewBox = {
+    top: "0 0 16 8",
+    bottom: "0 0 16 8",
+    left: "0 0 8 16",
+    right: "0 0 8 16",
+  }[side]
+
+  const path = {
+    top: <polyline points="0 0 8 8 16 0" />,
+    bottom: <polyline points="0 8 8 0 16 8" />,
+    left: <polyline points="0 0 8 8 0 16" />,
+    right: <polyline points="8 0 0 8 8 16" />,
+  }[side]
+
+  return (
+    <svg
+      viewBox={viewBox}
+      strokeWidth={1.5}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className=" fill-[#40455b]"
+    >
+      {path}
+    </svg>
+  )
+}
+
+const arrow = cva("absolute inline-block", {
+  variants: {
+    side: {
+      top: `-bottom-2 h-2 w-4`,
+      bottom: `-top-2 h-2 w-4`,
+      left: `-right-2 h-4 w-2`,
+      right: `-left-2 h-4 w-2`,
+    },
+  },
+})
+
+const Arrow = () => {
+  const { setArrowRef, middlewareData, placement } = useDropdownContext()
+  const side = placement.split("-")[0] as Side
+
+  return (
+    <span
+      ref={setArrowRef}
+      className={cn(arrow({ side }))}
+      style={{
+        left: middlewareData.arrow?.x,
+        top: middlewareData.arrow?.y,
+      }}
+    >
+      <ArrowSvg side={side} />
+    </span>
+  )
+}
+
 export const Dropdown = {
   Root,
   Content,
   Close,
   Trigger,
+  Arrow,
 }

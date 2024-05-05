@@ -26,6 +26,7 @@ export const MenuButton = ({
     </Dropdown.Trigger>
 
     <Dropdown.Content>
+      <Dropdown.Arrow />
       <Dropdown.Close>
         <MenuList.Root>
           {items.map(({ label, value }) => (
