@@ -35,6 +35,7 @@ export const NumberInput = forwardRef<HTMLInputElement, NumberInputProps>(
     const validate = (value: string) => {
       if (value === "") return true
       if (/[^0-9]/.test(value)) return false
+      if (value.length > String(max).length) return false
       const number = parseInt(value)
       return number >= min && number <= max && (!isValid || isValid(number))
     }
