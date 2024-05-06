@@ -5,52 +5,40 @@ import {
   flip,
   shift,
   Placement,
-  arrow,
+  Middleware,
+  Side,
 } from "@floating-ui/react"
 import { useCallback, useMemo, useState } from "preact/hooks"
 
-const OFFSET = 4
-
-interface MiddlewareOptions {
-  placement?: Placement
-  arrowRef?: Element | null
+const sides = new Set(["top", "right", "bottom", "left"])
+export const getSide = (placement: Placement) => {
+  const side = placement.split("-")[0]
+  return sides.has(side) ? (side as Side) : "bottom"
 }
-const getMiddlewares = ({
-  placement = "bottom",
-  arrowRef,
-}: MiddlewareOptions) => [
-  offset(state => {
-    if (!arrowRef) return OFFSET
-    const side = state.placement.split("-")[0]
-    const { clientHeight, clientWidth } = arrowRef
-    const arrowOffset =
-      side === "top" || side === "bottom" ? clientHeight : clientWidth
-    return OFFSET + arrowOffset
-  }),
+
+const defaultMiddleware = [
+  offset(4),
   shift({ padding: 4 }),
-  flip({
-    crossAxis: placement.includes("-"),
-    fallbackAxisSideDirection: "end",
-    padding: 4,
-  }),
-  arrowRef ? arrow({ element: arrowRef }) : undefined,
+  flip({ padding: 4 }),
 ]
 
-export interface FloatingOptions extends Omit<MiddlewareOptions, "arrowRef"> {
+export interface FloatingOptions {
   initialOpen?: boolean
   modal?: boolean
   open?: boolean
   onOpenChange?: (open: boolean) => void
+  placement?: Placement
+  middleware?: (Middleware | null | undefined | false)[]
 }
 
 export const useFloating = ({
   initialOpen = false,
   placement,
   modal,
+  middleware = [],
   open: controlledOpen,
   onOpenChange: setControlledOpen,
 }: FloatingOptions) => {
-  const [arrowRef, setArrowRef] = useState<Element | null>(null)
   const [uncontrolledOpen, setUncontrolledOpen] = useState(initialOpen)
 
   const isControlled = controlledOpen != null
@@ -69,12 +57,11 @@ export const useFloating = ({
     open,
     onOpenChange: setOpen,
     whileElementsMounted: autoUpdate,
-    middleware: getMiddlewares({ placement, arrowRef }),
+    middleware: [...defaultMiddleware, ...middleware],
   })
 
   return useMemo(
     () => ({
-      setArrowRef,
       open,
       setOpen,
       ...data,

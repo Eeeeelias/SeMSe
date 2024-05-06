@@ -6,7 +6,6 @@ export const meassureText = (text: string, reference: HTMLElement) => {
   element.style.position = "absolute"
   element.style.opacity = "0"
   element.style.whiteSpace = "preserve"
-  element.style
   element.innerHTML = text
 
   document.body.appendChild(element)

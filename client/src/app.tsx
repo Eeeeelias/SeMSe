@@ -1,5 +1,6 @@
 import { glob } from "goober/global"
 
+import { Button } from "./components/Button"
 import * as patterns from "./utils/patterns"
 
 glob`

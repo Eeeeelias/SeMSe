@@ -1,11 +1,6 @@
 import { JSX, createContext } from "preact"
 
 import {
-  useClick,
-  useDismiss,
-  useRole,
-  useInteractions,
-  Placement,
   FloatingPortal,
   FloatingFocusManager,
   useTransitionStatus,
@@ -13,40 +8,14 @@ import {
 } from "@floating-ui/react"
 import { cva } from "class-variance-authority"
 import { forwardRef } from "preact/compat"
-import { useContext, useMemo } from "preact/hooks"
+import { useContext } from "preact/hooks"
 
-import { FloatingOptions, useFloating } from "./useFloating"
+import { useDropdown, DropdownOptions } from "./useDropdown"
 import { cn } from "../../utils/cn"
 import { useMergeRefs } from "../../utils/mergeRefs"
 import { surface } from "../../utils/styles"
 import { ChildrenProp } from "../base/BaseProps"
 import { Slot } from "../base/Slot"
-
-interface DropdownOptions {
-  initialOpen?: boolean
-  placement?: Placement
-  modal?: boolean
-  open?: boolean
-  onOpenChange?: (open: boolean) => void
-}
-
-export const useDropdown = (props: FloatingOptions = {}) => {
-  const floating = useFloating({ ...props })
-
-  const click = useClick(floating.context)
-  const dismiss = useDismiss(floating.context)
-  const role = useRole(floating.context)
-
-  const interactions = useInteractions([click, dismiss, role])
-
-  return useMemo(
-    () => ({
-      ...interactions,
-      ...floating,
-    }),
-    [interactions, floating]
-  )
-}
 
 type ContextType = ReturnType<typeof useDropdown> | null
 
