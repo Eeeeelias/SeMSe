@@ -5,16 +5,15 @@ import { InputBorder, InputBorderProps } from "./InputBorder"
 import { cn } from "../../utils/cn"
 import { meassureText } from "../../utils/meassureText"
 import { useMergeRefs } from "../../utils/mergeRefs"
-import { ClassNameProp } from "../base/BaseProps"
+import { ClassNameProp, FocusHandlerProps } from "../base/BaseProps"
 
 export interface TextInputProps
   extends Pick<InputBorderProps, "label" | "alert">,
+    FocusHandlerProps,
     ClassNameProp {
   value?: string
   placeholder?: string
   onChange?: Dispatch<string>
-  onBlur?: () => void
-  onFocus?: () => void
   isValid?: (value: string) => boolean
 }
 

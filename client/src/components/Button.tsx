@@ -1,7 +1,11 @@
 import { VariantProps, cva } from "class-variance-authority"
 import { forwardRef } from "preact/compat"
 
-import { ChildrenProp, ClassNameProp } from "./base/BaseProps"
+import {
+  ChildrenProp,
+  ClassNameProp,
+  FocusHandlerProps,
+} from "./base/BaseProps"
 import { cn } from "../utils/cn"
 
 const button = cva("inline-flex items-center truncate whitespace-nowrap", {
@@ -30,6 +34,7 @@ const button = cva("inline-flex items-center truncate whitespace-nowrap", {
 
 export interface ButtonProps
   extends VariantProps<typeof button>,
+    FocusHandlerProps,
     ClassNameProp,
     ChildrenProp {
   onClick?: () => void

@@ -11,3 +11,8 @@ export interface ClassNameProp {
 export interface AsChildProp {
   asChild?: boolean
 }
+
+export interface FocusHandlerProps {
+  onBlur?: () => void
+  onFocus?: () => void
+}
