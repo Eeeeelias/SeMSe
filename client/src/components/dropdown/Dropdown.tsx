@@ -21,7 +21,7 @@ type ContextType = ReturnType<typeof useDropdown> | null
 
 const DropdownContext = createContext<ContextType>(null)
 
-export const useDropdownContext = () => {
+const useDropdownContext = () => {
   const context = useContext(DropdownContext)
 
   if (context == null) {
@@ -33,7 +33,7 @@ export const useDropdownContext = () => {
   return context
 }
 
-export const Root = ({
+const Root = ({
   children,
   modal = false,
   ...restOptions
@@ -48,7 +48,7 @@ export const Root = ({
 
 type DropdownTriggerProps = ChildrenProp
 
-export const Trigger = forwardRef<HTMLElement, DropdownTriggerProps>(
+const Trigger = forwardRef<HTMLElement, DropdownTriggerProps>(
   ({ children, ...triggerProps }, ref) => {
     const context = useDropdownContext()
     const refs = useMergeRefs([context.refs.setReference, ref])
@@ -103,7 +103,7 @@ const transition = cva(
   }
 )
 
-export const Content = ({
+const Content = ({
   style,
   ref: propRef,
   className,
