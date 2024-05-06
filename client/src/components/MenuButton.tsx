@@ -2,7 +2,6 @@ import { Placement } from "@floating-ui/react"
 
 import { Button, ButtonProps } from "./Button"
 import { Dropdown } from "./dropdown/Dropdown"
-import { MenuList } from "./MenuList"
 
 interface ListItem {
   label: string
@@ -25,17 +24,15 @@ export const MenuButton = ({
       <Button {...buttonProps} />
     </Dropdown.Trigger>
 
-    <Dropdown.Content>
-      <Dropdown.Arrow />
-      <Dropdown.Close>
-        <MenuList.Root>
-          {items.map(({ label, value }) => (
-            <MenuList.Item key={value} onClick={() => onSelect?.(value)}>
-              {label}
-            </MenuList.Item>
-          ))}
-        </MenuList.Root>
-      </Dropdown.Close>
-    </Dropdown.Content>
+    <Dropdown.Close>
+      <Dropdown.Menu>
+        <Dropdown.Arrow />
+        {items.map(({ label, value }) => (
+          <Dropdown.MenuItem key={value} onClick={() => onSelect?.(value)}>
+            {label}
+          </Dropdown.MenuItem>
+        ))}
+      </Dropdown.Menu>
+    </Dropdown.Close>
   </Dropdown.Root>
 )

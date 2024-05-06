@@ -24,6 +24,7 @@ const stack = cva("", {
       start: "items-start",
       center: "items-center",
       end: "items-end",
+      stretch: "items-stretch",
     },
     justify: {
       start: "justify-start",
@@ -62,7 +63,8 @@ export const surface = cva("text-text border backdrop-blur", {
       medium: "bg-background/50 border-background-surface/10",
       glassy: "bg-background-surface/10 border-text-priority/10",
     },
-    round: {
+    rounded: {
+      none: "rounded-none",
       sm: "rounded",
       md: "rounded-md",
       lg: "rounded-lg",
@@ -75,7 +77,7 @@ export const surface = cva("text-text border backdrop-blur", {
   },
   defaultVariants: {
     bg: "medium",
-    round: "md",
+    rounded: "md",
     shade: "low",
   },
 })

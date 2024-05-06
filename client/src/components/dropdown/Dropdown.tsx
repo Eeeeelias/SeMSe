@@ -5,17 +5,21 @@ import {
   FloatingFocusManager,
   useTransitionStatus,
   Side,
+  FloatingList,
+  useListItem,
 } from "@floating-ui/react"
 import { cva } from "class-variance-authority"
-import { forwardRef } from "preact/compat"
+import { HTMLAttributes, forwardRef } from "preact/compat"
 import { useContext } from "preact/hooks"
 
 import { useDropdown, DropdownOptions } from "./useDropdown"
+import { getSide } from "../../hooks/useFloating"
 import { cn } from "../../utils/cn"
 import { useMergeRefs } from "../../utils/mergeRefs"
-import { surface } from "../../utils/styles"
+import { surface, vstack } from "../../utils/styles"
 import { ChildrenProp } from "../base/BaseProps"
 import { Slot } from "../base/Slot"
+import { Button } from "../Button"
 
 type ContextType = ReturnType<typeof useDropdown> | null
 
@@ -103,45 +107,72 @@ const transition = cva(
   }
 )
 
-const Content = ({
-  style,
-  ref: propRef,
-  className,
-  ...props
-}: JSX.IntrinsicElements["div"]) => {
-  const { context: floatingContext, ...context } = useDropdownContext()
-  const ref = useMergeRefs([context.refs.setFloating, propRef])
-  const { isMounted, status } = useTransitionStatus(floatingContext, {
-    duration: 200,
+const Menu = forwardRef<HTMLDivElement, HTMLAttributes<HTMLDivElement>>(
+  ({
+    style,
+    ref: propRef,
+    className,
+    ...props
+  }: JSX.IntrinsicElements["div"]) => {
+    const { context: floatingContext, ...context } = useDropdownContext()
+    const ref = useMergeRefs([context.refs.setFloating, propRef])
+    const { isMounted, status } = useTransitionStatus(floatingContext, {
+      duration: 200,
+    })
+
+    if (!isMounted) return null
+
+    const side = getSide(context.placement)
+
+    return (
+      <FloatingPortal>
+        <FloatingFocusManager context={floatingContext} modal={context.modal}>
+          <FloatingList elementsRef={context.elementsRef}>
+            <div
+              ref={ref}
+              style={{
+                ...context.floatingStyles,
+                ...(typeof style === "object" ? style : {}),
+              }}
+              {...context.getFloatingProps(props)}
+            >
+              <div
+                className={cn([
+                  surface({ bg: "glassy", shade: "medium" }),
+                  transition({ side, open: status === "open" }),
+                  vstack({ align: "stretch" }),
+                  className,
+                ])}
+              >
+                {props.children}
+              </div>
+            </div>
+          </FloatingList>
+        </FloatingFocusManager>
+      </FloatingPortal>
+    )
+  }
+)
+
+interface MenuItemProps extends ChildrenProp {
+  onClick?: () => void
+}
+const MenuItem = ({ children, onClick }: MenuItemProps) => {
+  const { activeIndex, getItemProps, itemRole } = useDropdownContext()
+  const { ref, index } = useListItem()
+
+  const isActive = activeIndex === index || (activeIndex == null && index === 0)
+
+  const props = getItemProps({
+    onClick,
+    role: itemRole,
+    tabIndex: isActive ? 0 : -1,
   })
 
-  if (!isMounted) return null
-
-  const side = context.placement.split("-")[0] as Side
-
   return (
-    <FloatingPortal>
-      <FloatingFocusManager context={floatingContext} modal={context.modal}>
-        <div
-          ref={ref}
-          style={{
-            ...context.floatingStyles,
-            ...(typeof style === "object" ? style : {}),
-          }}
-          {...context.getFloatingProps(props)}
-        >
-          <div
-            className={cn([
-              surface({ bg: "glassy", shade: "medium" }),
-              transition({ side, open: status === "open" }),
-              className,
-            ])}
-          >
-            {props.children}
-          </div>
-        </div>
-      </FloatingFocusManager>
-    </FloatingPortal>
+    <Button ref={ref} {...props}>
+      {children}
+    </Button>
   )
 }
 
@@ -221,8 +252,9 @@ const Arrow = () => {
 
 export const Dropdown = {
   Root,
-  Content,
-  Close,
   Trigger,
+  Menu,
+  MenuItem,
+  Close,
   Arrow,
 }

@@ -6,6 +6,7 @@ import {
   useRole,
   useInteractions,
   Side,
+  useListNavigation,
 } from "@floating-ui/react"
 import { useMemo, useRef, useState } from "preact/hooks"
 
@@ -29,6 +30,9 @@ const getArrowMiddleware = ({ arrowRef }: MiddlewareOptions) => [
 
 interface Interactions {
   click?: boolean
+  navigation?:
+    | { loop: boolean; openOnArrowKeyDown: boolean; enabled: boolean }
+    | boolean
   dismiss?: boolean
   role?: "menu" | "listbox"
 }
@@ -36,11 +40,17 @@ export interface DropdownOptions extends Omit<FloatingOptions, "middleware"> {
   interactions?: Interactions
 }
 
-const getInteractions = (props: Interactions) =>
+const getInteractions = ({ navigation, ...props }: Interactions) =>
   ({
     click: true,
     dismiss: true,
     role: "menu",
+    navigation: {
+      enabled: navigation !== false,
+      loop: true,
+      openOnArrowKeyDown: true,
+      ...(navigation === true ? {} : navigation),
+    },
     ...props,
   } satisfies Required<Interactions>)
 
@@ -48,6 +58,7 @@ export const useDropdown = ({
   interactions = {},
   ...props
 }: DropdownOptions) => {
+  const [activeIndex, setActiveIndex] = useState<number | null>(0)
   const [arrowRef, setArrowRef] = useState<Element | null>(null)
   const elementsRef = useRef<HTMLElement[]>([])
 
@@ -61,6 +72,12 @@ export const useDropdown = ({
   const click = useClick(floating.context, {
     enabled: features.click,
   })
+  const navigation = useListNavigation(floating.context, {
+    activeIndex,
+    onNavigate: setActiveIndex,
+    listRef: elementsRef,
+    ...features.navigation,
+  })
   const dismiss = useDismiss(floating.context, {
     enabled: features.dismiss,
   })
@@ -68,18 +85,20 @@ export const useDropdown = ({
     role: features.role,
   })
 
-  const interactionProps = useInteractions([click, dismiss, role])
+  const interactionProps = useInteractions([click, navigation, dismiss, role])
   const itemRole: "menuitem" | "option" =
     features.role === "menu" ? "menuitem" : "option"
 
   return useMemo(
     () => ({
+      activeIndex,
+      setActiveIndex,
       setArrowRef,
       elementsRef,
       itemRole,
       ...floating,
       ...interactionProps,
     }),
-    [floating, interactionProps, itemRole]
+    [floating, interactionProps, activeIndex, itemRole]
   )
 }

@@ -38,6 +38,7 @@ export interface ButtonProps
     ClassNameProp,
     ChildrenProp {
   onClick?: () => void
+  tabIndex?: number
 }
 
 export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
