@@ -90,7 +90,8 @@ def get_media_size(request):
 
 def serve_image(request, uuid):
     conn = dbf.get_conn()
-
+    if not uuid:
+        return HttpResponse("No uuid provided", status=400)
     image_path = dbf.query_images(conn, uuid=uuid)[0]
     width = 300
 
