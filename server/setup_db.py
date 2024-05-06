@@ -1,4 +1,5 @@
 import os
+import sys
 import time
 
 import backend.database_functions as dbf
@@ -42,10 +43,9 @@ def fill_database():
         c = 0
         for show in dirs:
             c += 1
-            print(f"[{c}/{len(dirs)}] {show}:", end=" ")
             if show in existing_media:
-                print(f"already in database")
                 continue
+            print(f"[{c}/{len(dirs)}] {show}:", end=" ")
 
             media_path = os.path.join(f"/media/{dir_type}", show)
             add_media_to_db(conn, media_path, convert_dirs[dir_type])

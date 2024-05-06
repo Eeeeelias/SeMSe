@@ -12,11 +12,6 @@ services:
 
     semse-api:
         build: server
-        command: > #             python setup_db.py &
-            bash -c "
-            python setup_db.py &
-            gunicorn semse.wsgi:application --bind 0.0.0.0:8000 --workers 4 --timeout 120
-            "
         container_name: semse-api
         env_file:
             - .env
