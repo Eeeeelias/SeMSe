@@ -1,0 +1,276 @@
+openapi: 3.0.3
+info:
+  title: Semantic Media Search - OpenAPI 3.0
+  description: |-
+    This is the API documentation for the Se[mantic]Me[dia]Se[arch] tool. This tool enables you to search
+    through entire episodes, or movies based on a natural language query and tells you where exactly a given
+    conversation happened within the TV show or movie. You can also search through descriptions to maybe find exactly the plot you're looking for. 
+
+  license:
+    name: MIT
+    url: https://github.com/Eeeeelias/SeMSe/blob/main/LICENSE
+  version: 1.0.0
+servers:
+  - url: https://semse.rhostruct.de
+tags:
+  - name: media
+    description: Get information on what media is available
+  - name: query
+    description: Make a query to the database
+  - name: image
+    description: Get images of episodes
+paths:
+  /media:
+    get:
+      tags:
+        - media
+      summary: Returns all media items with available seasons
+      description: Returns the names of items in media libraries
+      operationId: getMedia
+      responses:
+        '200':
+          description: Successful retrieval
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Media'
+        '501':
+          description: Database error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /size:
+    get:
+      tags:
+        - media
+      summary: Returns the size of the database
+      description: Get the size of each database table in terms of rows
+      operationId: getSize
+      responses:
+        '200':
+          description: Successful retrieval
+          content:
+            application/json:
+              schema:
+               $ref: '#/components/schemas/Size'
+  /test:
+    get:
+      tags:
+        - query
+      summary: Test the query API
+      description: Returns plain HTML to test the query API and see raw output
+      operationId: testAPI
+      responses:
+        '200':
+          description: Successfully loaded HTML
+          content:
+            text/html:
+              schema:
+                type: string
+                format: binary
+  /query:
+    post:
+      tags:
+        - query
+      summary: Query the database
+      description: Query the database for a search
+      operationId: postQuery
+      requestBody:
+        description: Search a query in the database 
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Query'
+        required: true
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/QueryResult'          
+        '400':
+          description: No query or table provided
+        '403':
+          description: Invalid table provided
+        '501':
+          description: Database error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          
+  /image/{imageId}:
+    get:
+      tags:
+        - image
+      summary: Get an image for an associated episode
+      description: Get the associated image given the imageId provided by query/
+      operationId: getImageById
+      parameters:
+        - name: imageId
+          in: path
+          description: uuid of the image
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Get image
+          content:
+            application/octet-stream:
+              schema:
+                type: string
+                format: binary
+        '400':
+          description: No uuid provided
+        '404':
+          description: Image not found
+components:
+  schemas:
+    Error:
+      type: object
+      properties:
+        error:
+          type: string
+          description: Error fetching data from database
+          example: 'there was an error fetching the results from the database'
+    Media:
+      type: object
+      properties:
+        Animes:
+          type: object
+          properties:
+            animeName:
+              type: array
+              items:
+                type: integer
+                description: Season number
+                example: 0
+        Movies:
+          type: object
+          properties:
+            movieName:
+              type: array
+              items:
+                type: integer
+                description: Season number
+                example: null
+        TVShows:
+          type: object
+          properties:
+            tvShowName:
+              type: array
+              items:
+                type: integer
+                description: Season number
+                example: 1
+    Size:
+      type: object
+      properties:
+        tv_shows:
+          type: integer
+          description: Number of TV shows.
+          example: 5
+        animes:
+          type: integer
+          description: Number of animes.
+          example: 23
+        movies:
+          type: integer
+          description: Number of movies.
+          example: 15
+        descriptions:
+          type: integer
+          description: Number of descriptions.
+          example: 76
+        subtitles:
+          type: integer
+          description: Number of subtitles.
+          example: 425
+      required:
+        - tv_shows
+        - animes
+        - movies
+        - descriptions
+        - subtitles
+    Query:
+      type: object
+      properties:
+        query:
+          type: string
+          description: The search query.
+          example: Parkour!
+        table:
+          type: string
+          description: The table to search in.
+          example: TV Shows
+        show:
+          type: string
+          description: The name of the TV show.
+          example: The Office US
+        language:
+          type: string
+          description: The language of the content.
+          example: English
+        type:
+          type: string
+          enum: [description, conversation, both]
+          description: The type of content to search for.
+          example: both
+        season:
+          type: string
+          description: The season of the TV show.
+          example: S06
+        offset:
+          type: integer
+          description: The offset for pagination.
+          example: 10
+      required:
+        - query
+        - table
+        - type
+    QueryResult:
+      type: object
+      properties:
+        results:
+          type: array
+          items:
+            type: object
+            properties:
+              title:
+                type: string
+                description: The title of the TV show.
+                example: The Office US
+              episodeId:
+                type: string
+                description: The episode ID of the result.
+                example: S06E01
+              timestamp:
+                type: string
+                description: The timestamp of the result.
+                example: 00:01:30,466 - 00:01:35,304
+              text:
+                type: string
+                description: The text content of the result.
+                example: WHOO! - AHH! PARKOUR!
+              exactMatch:
+                type: string
+                description: |-
+                  Indicates the exact match if the conversation is longer.
+                example: null
+              similarity:
+                type: number
+                description: The similarity score of the result.
+                example: 0.7835047830301809
+              type:
+                type: string
+                description: The type of the result.
+                example: conversation
+              imageId:
+                type: string
+                description: The ID of the associated episode image.
+                example: b91d3e54-3dfe-4995-8c8e-6ad6df705b63
+      required:
+        - results
