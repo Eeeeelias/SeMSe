@@ -19,7 +19,7 @@ export const MenuButton = ({
   placement = "bottom-start",
   ...buttonProps
 }: MenuButtonProps) => (
-  <Dropdown.Root placement={placement}>
+  <Dropdown.Root placement={placement} interactions={{ role: "menu" }}>
     <Dropdown.Trigger>
       <Button {...buttonProps} />
     </Dropdown.Trigger>
