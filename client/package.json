@@ -7,7 +7,10 @@
     "dev": "vite",
     "build": "tsc && vite build",
     "preview": "vite preview",
-    "lint": "eslint ./src ./tailwind --ext .ts,.tsx --fix"
+    "lint": "eslint ./src ./tailwind --ext .ts,.tsx --fix",
+    "openapi:gen": "openapi-ts -i ../openapi.yaml -o src/generated-api",
+    "openapi:spec": "redocly build-docs openapi.yaml --output=public/api-spec.html",
+    "prepare": "bun openapi:gen"
   },
   "dependencies": {
     "@floating-ui/react": "^0.26.13",
@@ -18,8 +21,10 @@
     "tailwind-merge": "^2.3.0"
   },
   "devDependencies": {
+    "@hey-api/openapi-ts": "^0.43.2",
     "@preact/preset-vite": "^2.8.2",
     "@pretty-cozy/eslint-config": "^0.3.0",
+    "@redocly/cli": "^1.12.0",
     "@tailwindcss/typography": "^0.5.13",
     "autoprefixer": "^10.4.19",
     "eslint": "8.57.0",
@@ -33,6 +38,7 @@
       "@pretty-cozy/eslint-config/preact",
       "@pretty-cozy/eslint-config/tailwind"
     ],
+    "ignorePatterns": ["./src/generated-api"],
     "rules": {
       "import/no-unresolved": [
         2,
