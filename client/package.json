@@ -7,7 +7,7 @@
     "dev": "vite",
     "build": "tsc && vite build",
     "preview": "vite preview",
-    "lint": "eslint ./src ./tailwind --ext .ts,.tsx --fix",
+    "lint": "eslint ./src ./tailwind --ext .ts,.tsx --fix --ignore-path .gitignore",
     "openapi:gen": "openapi-ts -i ../openapi.yaml -o src/generated-api",
     "openapi:spec": "redocly build-docs openapi.yaml --output=public/api-spec.html",
     "prepare": "bun openapi:gen"
