@@ -35,7 +35,7 @@ def fill_database():
         if dir_type not in convert_dirs:
             continue
         print("Looking at directory", dir_type, "...")
-        existing_media = dbf.get_existing_media(convert_dirs[dir_type], conn)
+        existing_media, _ = dbf.get_existing_media(convert_dirs[dir_type], conn)
         existing_media = [media[0] for media in existing_media]
         dirs = os.listdir(f"/media/{dir_type}")
         c = 0

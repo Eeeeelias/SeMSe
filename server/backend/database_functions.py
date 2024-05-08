@@ -259,7 +259,16 @@ def get_existing_media(table, conn):
             JOIN Descriptions AS d ON t.{table[:-1]}ID = d.{table[:-1]}ID
             """
         )
-        return cursor.fetchall()
+        description_shows = cursor.fetchall()
+        cursor.execute(
+            f"""
+            SELECT t.Title, s.EpisodeID
+            FROM {table} AS t
+            JOIN Subtitles AS s ON t.{table[:-1]}ID = s.{table[:-1]}ID
+            """
+        )
+        subtitle_shows = cursor.fetchall()
+    return description_shows, subtitle_shows
 
 
 def size_of_db(conn):

@@ -25,7 +25,7 @@ paths:
       tags:
         - media
       summary: Returns all media items with available seasons
-      description: Returns the names of items in media libraries
+      description: Returns the names of items in media libraries with available seasons for both descriptions and conversations
       operationId: getMedia
       responses:
         '200':
@@ -143,29 +143,56 @@ components:
           type: object
           properties:
             animeName:
-              type: array
-              items:
-                type: integer
-                description: Season number
-                example: 0
+              type: object
+              properties:
+                descriptions:
+                  type: array
+                  items:
+                    type: integer
+                    description: Season number
+                    example: 0
+                conversations:
+                  type: array
+                  items:
+                    type: integer
+                    description: Season number
+                    example: 0
         Movies:
           type: object
           properties:
             movieName:
-              type: array
-              items:
-                type: integer
-                description: Season number
-                example: null
+              type: object
+              properties:
+                descriptions:
+                  type: array
+                  items:
+                    type: integer
+                    description: Season number
+                    example: 0
+                conversations:
+                  type: array
+                  items:
+                    type: integer
+                    description: Season number
+                    example: null
         TVShows:
           type: object
           properties:
             tvShowName:
-              type: array
-              items:
-                type: integer
-                description: Season number
-                example: 1
+              type: object
+              properties:
+                descriptions:
+                  type: array
+                  items:
+                    type: integer
+                    description: Season number
+                    example: 0
+                conversations:
+                  type: array
+                  items:
+                    type: integer
+                    description: Season number
+                    example: 1
     Size:
       type: object
       properties:

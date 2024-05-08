@@ -24,18 +24,30 @@ def get_all_media(request):
     return JsonResponse(all_media)
 
 
-def get_media_dict(media):
-    # split episode_id from s01e01 to just 1
-    unique_season = set()
-    for show in media:
+def combine_show_with_season(tuple_list):
+    available_seasons = {}
+    for show in tuple_list:
         name = show[0]
         try:
+            # split episode_id from s01e01 to just 1
             season = int(show[1].upper().split("E")[0][1:])
         except ValueError:
             season = None
-        unique_season.add((name, season))
+        available_seasons[name] = available_seasons.get(name, []) + [season]
+    return available_seasons
 
-    return {season[0]: [s[1] for s in unique_season if s[0] == season[0]] for season in unique_season}
+
+def get_media_dict(media):
+    descriptions = media[0]
+    subtitles = media[1]
+
+    desc_seasons = combine_show_with_season(descriptions)
+    sub_seasons = combine_show_with_season(subtitles)
+
+    all_info = {key: {'descriptions': sorted(set(desc_seasons.get(key, []))),
+                      'conversations': sorted(set(sub_seasons.get(key, [])))}
+                for key in set(desc_seasons.keys()).union(sub_seasons.keys())}
+    return all_info
 
 
 def query_media(request):
