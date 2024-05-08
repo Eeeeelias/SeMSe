@@ -1,6 +1,4 @@
 import os
-import sys
-import time
 
 import backend.database_functions as dbf
 import backend.retrieve_embeddings as ret

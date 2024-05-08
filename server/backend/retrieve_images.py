@@ -2,7 +2,7 @@ import os
 
 import psycopg2
 
-from backend.database_functions import query_images, get_conn, insert_into_images, init_db
+from backend.database_functions import query_images, get_conn, insert_into_images
 
 LIBRARY_MAP = {
     "Animes": "Anime",
