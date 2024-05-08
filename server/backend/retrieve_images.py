@@ -1,6 +1,7 @@
 import os
-
+import io
 import psycopg2
+from PIL import Image as PILImage
 
 from backend.database_functions import query_images, get_conn, insert_into_images
 
@@ -47,3 +48,19 @@ def map_image(title: str, episode_id: str, library: str, conn: psycopg2.connect 
         true_uuid = insert_into_images(conn, image_path)
 
     return true_uuid
+
+
+def convert_image(image_path, width=300) -> io.BytesIO:
+    with open(image_path, 'rb') as image_file:
+        image = PILImage.open(image_file)
+
+        # scale image to width px while maintaining aspect ratio
+        w_percent = (float(width) / float(image.size[0]))
+        h_size = int((float(image.size[1]) * float(w_percent)))
+        image = image.resize((int(width), h_size))
+
+        # Convert the image to bytes in memory
+        image_buffer = io.BytesIO()
+        image.save(image_buffer, format='JPEG')
+        image_buffer.seek(0)
+    return image_buffer
