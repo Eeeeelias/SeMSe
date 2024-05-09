@@ -140,59 +140,69 @@ components:
       type: object
       properties:
         Animes:
-          type: object
-          properties:
-            animeName:
-              type: object
-              properties:
-                descriptions:
-                  type: array
-                  items:
-                    type: integer
-                    description: Season number
-                    example: 0
-                conversations:
-                  type: array
-                  items:
-                    type: integer
-                    description: Season number
-                    example: 0
+          type: array
+          items:
+            type: object
+            properties:
+              name:
+                type: string
+                description: name of anime
+                example: Laid-Back Camp
+              descriptions:
+                type: array
+                items:
+                  type: integer
+                description: seasons supported by description search
+                example: [1, 2, 3]
+              conversations:
+                type: array
+                items:
+                  type: integer
+                description: seasons supported by conversation search
+                example: [1, 2]
+
         Movies:
-          type: object
-          properties:
-            movieName:
-              type: object
-              properties:
-                descriptions:
-                  type: array
-                  items:
-                    type: integer
-                    description: Season number
-                    example: 0
-                conversations:
-                  type: array
-                  items:
-                    type: integer
-                    description: Season number
-                    example: null
+          type: array
+          items:
+            type: object
+            properties:
+              name:
+                type: string
+                description: name of movie
+                example: Robin Hood
+              descriptions:
+                type: array
+                items:
+                  type: integer
+                description: seasons supported by description search
+                example: null
+              conversations:
+                type: array
+                items:
+                  type: integer
+                description: seasons supported by conversation search
+                example: null
         TVShows:
-          type: object
-          properties:
-            tvShowName:
-              type: object
-              properties:
-                descriptions:
-                  type: array
-                  items:
-                    type: integer
-                    description: Season number
-                    example: 0
-                conversations:
-                  type: array
-                  items:
-                    type: integer
-                    description: Season number
-                    example: 1
+          type: array
+          items:
+            type: object
+            properties:
+              name:
+                type: string
+                description: name of show
+                example: The Office US
+              descriptions:
+                type: array
+                items:
+                  type: integer
+                description: seasons supported by description search
+                example: [1, 2, 3]
+              conversations:
+                type: array
+                items:
+                  type: integer
+                description: seasons supported by conversation search
+                example: [1, 2, 6]
     Size:
       type: object
       properties:

@@ -41,9 +41,10 @@ def get_media_dict(media):
     desc_seasons = combine_show_with_season(descriptions)
     sub_seasons = combine_show_with_season(subtitles)
 
-    all_info = {key: {'descriptions': sorted(set(desc_seasons.get(key, []))),
-                      'conversations': sorted(set(sub_seasons.get(key, [])))}
-                for key in set(desc_seasons.keys()).union(sub_seasons.keys())}
+    all_info = [{'name': key,
+                 'descriptions': sorted(set(desc_seasons.get(key, []))),
+                 'conversations': sorted(set(sub_seasons.get(key, [])))}
+                for key in set(desc_seasons.keys()).union(sub_seasons.keys())]
     return all_info
 
 
