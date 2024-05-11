@@ -21,7 +21,7 @@ const button = cva("inline-flex items-center truncate whitespace-nowrap", {
       false: "rounded",
     },
     size: {
-      default: "h-10 gap-2 px-3",
+      default: "h-10 shrink-0 gap-2 px-3",
       icon: "size-10 shrink-0 items-center justify-center",
     },
   },
