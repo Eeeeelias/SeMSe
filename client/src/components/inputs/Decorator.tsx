@@ -50,6 +50,36 @@ const AlertIcon = ({ kind, text }: AlertProps) => {
   )
 }
 
+export interface InputLabelProps extends ClassNameProp, ChildrenProp {
+  label: string
+  alert?: AlertProps
+}
+
+const Label = ({
+  label,
+  className,
+  children,
+  alert,
+  ...delegated
+}: InputLabelProps) => (
+  <label
+    {...delegated}
+    className={cn(
+      focusRing,
+      hstack({ inline: true, align: "center" }),
+      "h-full select-none whitespace-nowrap rounded",
+      alert ? "pl-3" : "px-3",
+      alert && alertVariants[alert.kind].border,
+      className
+    )}
+  >
+    <span className="text-text-gentle text-sm font-semibold">{label}</span>
+    <span className="bg-text-gentle mx-2 inline-block size-1.5 shrink-0 rounded-full" />
+    {children}
+    {alert && <AlertIcon {...alert} />}
+  </label>
+)
+
 const Action = ({ icon, onClick }: Action) => (
   <Button kind="flat" size="icon" onClick={onClick} className="h-full">
     <Icon icon={icon} />
@@ -61,41 +91,32 @@ export interface Action {
   onClick?: () => void
 }
 export interface InputBorderProps extends ClassNameProp, ChildrenProp {
-  label: string
-  alert?: AlertProps
   action?: Action
+  alert?: AlertProps
 }
 
-export const InputBorder = ({
-  label,
+const Border = ({
   className,
   children,
-  alert,
   action,
+  alert,
   ...delegated
 }: InputBorderProps) => (
   <div
+    {...delegated}
     className={cn(
       hstack({ inline: true, align: "center" }),
-      "border-stroke-gentle h-10 rounded border"
+      "border-stroke-gentle h-10 rounded border",
+      alert && alertVariants[alert.kind].border,
+      className
     )}
   >
-    <label
-      {...delegated}
-      className={cn(
-        focusRing,
-        hstack({ inline: true, align: "center" }),
-        "h-full select-none whitespace-nowrap rounded",
-        alert ? "pl-3" : "px-3",
-        alert && alertVariants[alert.kind].border,
-        className
-      )}
-    >
-      <span className="text-text-gentle text-sm font-semibold">{label}</span>
-      <span className="bg-text-gentle mx-2 inline-block size-1.5 rounded-full" />
-      {children}
-    </label>
-    {alert && <AlertIcon {...alert} />}
+    {children}
     {action && <Action {...action} />}
   </div>
 )
+
+export const Decorator = {
+  Border,
+  Label,
+}

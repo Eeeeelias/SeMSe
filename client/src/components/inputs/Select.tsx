@@ -1,6 +1,6 @@
 import { Dispatch } from "preact/hooks"
 
-import { InputBorder, InputBorderProps } from "./InputBorder"
+import { Action, AlertProps, Decorator } from "./Decorator"
 import { cn } from "../../utils/cn"
 import { FocusHandlerProps } from "../base/BaseProps"
 import { Dropdown } from "../dropdown/Dropdown"
@@ -9,9 +9,14 @@ interface SelectTriggerProps extends FocusHandlerProps {
   placeholder: string
   value?: string
 }
-const SelectTrigger = ({ placeholder, value }: SelectTriggerProps) => (
+const SelectTrigger = ({
+  placeholder,
+  value,
+  ...delegated
+}: SelectTriggerProps) => (
   <Dropdown.Trigger>
     <button
+      {...delegated}
       kind="flat"
       className={cn(
         "-ml-3 h-full min-w-[5ch] pl-3 text-start outline-none",
@@ -47,43 +52,40 @@ const SelectDropdown = ({
   </Dropdown.Close>
 )
 
-export interface SelectProps
-  extends Pick<InputBorderProps, "label" | "alert">,
-    FocusHandlerProps {
+export interface SelectProps extends FocusHandlerProps {
   value?: string
   options: Option[]
   placeholder?: string
   onChange?: Dispatch<string>
+  label: string
+  alert?: AlertProps
+  action?: Action
 }
 
 export const Select = ({
   options,
-  value,
   placeholder = "Select one",
   onChange,
-  onBlur,
-  onFocus,
-  ...labelProps
+  action,
+  alert,
+  label,
+  ...delegated
 }: SelectProps) => {
   return (
-    <InputBorder
-      {...labelProps}
-      className={
-        "bgl-base-transparent hover:bgl-layer-w/5 focus-within:bgl-layer-w/5 active:bgl-layer-w/10 cursor-pointer"
-      }
-    >
-      <Dropdown.Root
-        placement="bottom-start"
-        interactions={{ role: "listbox" }}
+    <Decorator.Border action={action} alert={alert}>
+      <Decorator.Label
+        label={label}
+        alert={alert}
+        className="bgl-base-transparent hover:bgl-layer-w/5 focus-within:bgl-layer-w/5 active:bgl-layer-w/10"
       >
-        <SelectTrigger
-          value={value}
-          placeholder={placeholder}
-          onBlur={onBlur}
-          onFocus={onFocus}
-        />
-        <SelectDropdown options={options} onSelect={onChange} />
-      </Dropdown.Root>
-    </InputBorder>
+        <Dropdown.Root
+          placement="bottom-start"
+          interactions={{ role: "listbox" }}
+        >
+          <SelectTrigger {...delegated} placeholder={placeholder} />
+          <SelectDropdown options={options} onSelect={onChange} />
+        </Dropdown.Root>
+      </Decorator.Label>
+    </Decorator.Border>
   )
 }
