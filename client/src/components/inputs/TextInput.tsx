@@ -1,7 +1,9 @@
+import { useAtomValue } from "@yaasl/preact"
 import { forwardRef } from "preact/compat"
 import { Dispatch, useMemo, useState } from "preact/hooks"
 
 import { Decorator, AlertProps, Action } from "./Decorator"
+import { breakpoint } from "../../data/breakpoint"
 import { cn } from "../../utils/cn"
 import { meassureText } from "../../utils/meassureText"
 import { useMergeRefs } from "../../utils/mergeRefs"
@@ -32,6 +34,7 @@ export const TextInput = forwardRef<HTMLInputElement, TextInputProps>(
     },
     externalRef
   ) => {
+    const { isMobile } = useAtomValue(breakpoint)
     const [text, setText] = useState(value ?? "")
     const [internalRef, setInternalRef] = useState<HTMLInputElement | null>(
       null
@@ -39,14 +42,14 @@ export const TextInput = forwardRef<HTMLInputElement, TextInputProps>(
     const ref = useMergeRefs([setInternalRef, externalRef])
 
     const width = useMemo(() => {
-      if (!internalRef) return
+      if (!internalRef || isMobile) return
       const placeholderWidth = meassureText(placeholder, internalRef).width
       const valueWidth = meassureText(text, internalRef).width
       return Math.max(placeholderWidth, valueWidth)
-    }, [placeholder, text, internalRef])
+    }, [placeholder, text, internalRef, isMobile])
 
     return (
-      <Decorator.Border action={action}>
+      <Decorator.Border action={action} className={cn(isMobile && "w-56")}>
         <Decorator.Label {...labelProps} className={"cursor-text"}>
           <input
             ref={ref}
