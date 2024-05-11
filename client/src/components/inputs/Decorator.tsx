@@ -1,5 +1,6 @@
-import { cn } from "../../utils/cn"
-import { focusRing, hstack } from "../../utils/styles"
+import { cn } from "~/utils/cn"
+import { focusRing, hstack } from "~/utils/styles"
+
 import { ChildrenProp, ClassNameProp } from "../base/BaseProps"
 import { Icon, IconName } from "../base/Icon"
 import { Button } from "../Button"

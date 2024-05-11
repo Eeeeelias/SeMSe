@@ -1,12 +1,13 @@
 import { VariantProps, cva } from "class-variance-authority"
 import { forwardRef } from "preact/compat"
 
+import { cn } from "~/utils/cn"
+
 import {
   ChildrenProp,
   ClassNameProp,
   FocusHandlerProps,
 } from "./base/BaseProps"
-import { cn } from "../utils/cn"
 
 const button = cva("inline-flex items-center truncate whitespace-nowrap", {
   variants: {

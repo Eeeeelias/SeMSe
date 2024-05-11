@@ -2,11 +2,12 @@ import { useAtomValue } from "@yaasl/preact"
 import { forwardRef } from "preact/compat"
 import { Dispatch, useMemo, useState } from "preact/hooks"
 
+import { breakpoint } from "~/data/breakpoint"
+import { cn } from "~/utils/cn"
+import { meassureText } from "~/utils/meassureText"
+import { useMergeRefs } from "~/utils/mergeRefs"
+
 import { Decorator, AlertProps, Action } from "./Decorator"
-import { breakpoint } from "../../data/breakpoint"
-import { cn } from "../../utils/cn"
-import { meassureText } from "../../utils/meassureText"
-import { useMergeRefs } from "../../utils/mergeRefs"
 import { ClassNameProp, FocusHandlerProps } from "../base/BaseProps"
 
 export interface TextInputProps extends FocusHandlerProps, ClassNameProp {

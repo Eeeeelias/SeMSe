@@ -2,8 +2,9 @@ import { ComponentChildren } from "preact"
 
 import { VariantProps, cva } from "class-variance-authority"
 
+import { cn } from "~/utils/cn"
+
 import { ClassNameProp } from "./BaseProps"
-import { cn } from "../../utils/cn"
 
 const icon = cva("inline-block shrink-0", {
   variants: {

@@ -1,7 +1,8 @@
 import { Dispatch } from "preact/hooks"
 
+import { cn } from "~/utils/cn"
+
 import { Action, AlertProps, Decorator } from "./Decorator"
-import { cn } from "../../utils/cn"
 import { FocusHandlerProps } from "../base/BaseProps"
 import { Dropdown } from "../dropdown/Dropdown"
 

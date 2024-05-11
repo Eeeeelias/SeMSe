@@ -10,7 +10,7 @@ import {
 } from "@floating-ui/react"
 import { useMemo, useRef, useState } from "preact/hooks"
 
-import { FloatingOptions, getSide, useFloating } from "../../hooks/useFloating"
+import { FloatingOptions, getSide, useFloating } from "~/hooks/useFloating"
 
 const getArrowOffset = (side: Side, arrowRef: Element) => {
   const { clientHeight, clientWidth } = arrowRef

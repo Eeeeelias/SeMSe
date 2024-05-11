@@ -1,5 +1,6 @@
+import { MediaService, Size } from "~/generated-api"
+
 import { fetchAtom } from "./utils/fetchAtom"
-import { MediaService, Size } from "../generated-api"
 
 const mockedSize: Size = {
   tv_shows: 176,

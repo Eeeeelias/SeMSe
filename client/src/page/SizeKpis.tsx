@@ -1,9 +1,9 @@
 import { useAtomValue } from "@yaasl/preact"
 import { Dispatch, useEffect, useRef, useState } from "preact/hooks"
 
-import { sizeAtom } from "../data/size"
-import { cn } from "../utils/cn"
-import { surface } from "../utils/styles"
+import { sizeAtom } from "~/data/size"
+import { cn } from "~/utils/cn"
+import { surface } from "~/utils/styles"
 
 const getSteps = (value: number) =>
   value < 250
@@ -79,7 +79,7 @@ export const SizeKpis = () => {
       )}
     >
       {Object.entries(size).map(([key, value]) => (
-        <NumberKpi key={key} title={key} value={value as number} />
+        <NumberKpi key={key} title={key} value={value} />
       ))}
     </div>
   )

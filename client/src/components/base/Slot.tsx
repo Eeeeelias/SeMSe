@@ -2,9 +2,10 @@ import { Ref, cloneElement, isValidElement } from "preact"
 
 import { forwardRef, HTMLAttributes } from "preact/compat"
 
+import { cn } from "~/utils/cn"
+import { useMergeRefs } from "~/utils/mergeRefs"
+
 import { ChildrenProp } from "./BaseProps"
-import { cn } from "../../utils/cn"
-import { useMergeRefs } from "../../utils/mergeRefs"
 
 type AnyProps = Record<string, unknown>
 
