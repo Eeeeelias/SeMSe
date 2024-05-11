@@ -2,6 +2,7 @@ import { cn } from "../../utils/cn"
 import { focusRing, hstack } from "../../utils/styles"
 import { ChildrenProp, ClassNameProp } from "../base/BaseProps"
 import { Icon, IconName } from "../base/Icon"
+import { Button } from "../Button"
 
 type AlertKind = "error" | "warn" | "info" | "success"
 const alertVariants: Record<
@@ -49,9 +50,20 @@ const AlertIcon = ({ kind, text }: AlertProps) => {
   )
 }
 
+const Action = ({ icon, onClick }: Action) => (
+  <Button kind="flat" size="icon" onClick={onClick} className="h-full">
+    <Icon icon={icon} />
+  </Button>
+)
+
+export interface Action {
+  icon: IconName
+  onClick?: () => void
+}
 export interface InputBorderProps extends ClassNameProp, ChildrenProp {
   label: string
   alert?: AlertProps
+  action?: Action
 }
 
 export const InputBorder = ({
@@ -59,22 +71,31 @@ export const InputBorder = ({
   className,
   children,
   alert,
+  action,
   ...delegated
 }: InputBorderProps) => (
-  <label
-    {...delegated}
+  <div
     className={cn(
-      focusRing,
       hstack({ inline: true, align: "center" }),
-      "border-stroke-gentle h-10 select-none whitespace-nowrap rounded border",
-      alert ? "pl-3" : "px-3",
-      alert && alertVariants[alert.kind].border,
-      className
+      "border-stroke-gentle h-10 rounded border"
     )}
   >
-    <span className="text-text-gentle text-sm font-semibold">{label}</span>
-    <span className="bg-text-gentle mx-2 inline-block size-1.5 rounded-full" />
-    {children}
+    <label
+      {...delegated}
+      className={cn(
+        focusRing,
+        hstack({ inline: true, align: "center" }),
+        "h-full select-none whitespace-nowrap rounded",
+        alert ? "pl-3" : "px-3",
+        alert && alertVariants[alert.kind].border,
+        className
+      )}
+    >
+      <span className="text-text-gentle text-sm font-semibold">{label}</span>
+      <span className="bg-text-gentle mx-2 inline-block size-1.5 rounded-full" />
+      {children}
+    </label>
     {alert && <AlertIcon {...alert} />}
-  </label>
+    {action && <Action {...action} />}
+  </div>
 )
