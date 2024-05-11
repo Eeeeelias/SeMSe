@@ -70,17 +70,17 @@ const NumberKpi = ({ title, value }: NumberKpiProps) => {
 
 export const SizeKpis = () => {
   const size = useAtomValue(sizeAtom)
-  return (
+
+  return !size ? null : (
     <div
       className={cn(
         surface(),
         "m-4 mx-auto flex w-max flex-wrap justify-center gap-4 px-4 py-2"
       )}
     >
-      {size &&
-        Object.entries(size).map(([key, value]) => (
-          <NumberKpi key={key} title={key} value={value as number} />
-        ))}
+      {Object.entries(size).map(([key, value]) => (
+        <NumberKpi key={key} title={key} value={value as number} />
+      ))}
     </div>
   )
 }
