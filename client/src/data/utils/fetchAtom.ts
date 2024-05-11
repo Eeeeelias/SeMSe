@@ -10,15 +10,11 @@ const persistance = () => [localStorage(), expiration({ expiresIn: DAY })]
 interface FetcherOptions {
   dispatch: () => Promise<unknown>
 }
-const loadValue = middleware<FetcherOptions>(({ atom, options }) => {
-  const { dispatch } = options
-  const reload = () =>
-    atom.get() == null && dispatch().then(value => atom.set(value))
-
-  return {
-    didInit: () => void reload(),
-    set: () => void reload(),
-  }
+const loadValue = middleware<FetcherOptions>({
+  didInit: ({ value, atom, options }) => {
+    if (value != null) return
+    return options.dispatch().then(value => atom.set(value))
+  },
 })
 
 interface FetchAtomProps<T> {
