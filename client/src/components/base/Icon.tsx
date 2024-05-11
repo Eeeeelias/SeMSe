@@ -127,12 +127,45 @@ const icons = {
       </>
     ),
   },
+  "plus-circle": {
+    iconName: "plus-circle",
+    path: (
+      <>
+        <circle cx="12" cy="12" r="10"></circle>
+        <line x1="12" y1="8" x2="12" y2="16"></line>
+        <line x1="8" y1="12" x2="16" y2="12"></line>
+      </>
+    ),
+  },
+  minus: {
+    iconName: "minus",
+    path: <line x1="5" y1="12" x2="19" y2="12" />,
+  },
+  "minus-circle": {
+    iconName: "minus-circle",
+    path: (
+      <>
+        <circle cx="12" cy="12" r="10" />
+        <line x1="8" y1="12" x2="16" y2="12" />
+      </>
+    ),
+  },
   xmark: {
     iconName: "xmark",
     path: (
       <>
         <line x1="18" y1="6" x2="6" y2="18" />
         <line x1="6" y1="6" x2="18" y2="18" />
+      </>
+    ),
+  },
+  xcircle: {
+    iconName: "xcircle",
+    path: (
+      <>
+        <circle cx="12" cy="12" r="10" />
+        <line x1="15" y1="9" x2="9" y2="15" />
+        <line x1="9" y1="9" x2="15" y2="15" />
       </>
     ),
   },
