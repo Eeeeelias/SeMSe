@@ -136,6 +136,28 @@ def insert_into_table(conn, table_name, table_type, data):
     conn.commit()
 
 
+def remove_from_tables(conn, table_name, title):
+    table_name_single = table_name[:-1]
+    with conn.cursor() as cursor:
+        cursor.execute(
+            f"""
+            SELECT {table_name_single}ID FROM {table_name} WHERE Title = %s;
+            """,
+            (title,)
+        )
+        show_id = cursor.fetchone()
+        if show_id:
+            show_id = show_id[0]
+            cursor.execute(
+                f"""
+                DELETE FROM Descriptions WHERE {table_name_single}ID = %s;
+                DELETE FROM Subtitles WHERE {table_name_single}ID = %s;
+                DELETE FROM {table_name} WHERE {table_name_single}ID = %s;
+                """,
+                (show_id, show_id, show_id)
+            )
+    conn.commit()
+
 def insert_into_images(conn, file_path):
     uuid = str(uuid4())
     with conn.cursor() as cursor:

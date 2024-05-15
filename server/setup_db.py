@@ -36,7 +36,7 @@ def fill_database():
             continue
         print("Looking at directory", dir_type, "...")
         existing_media, _ = dbf.get_existing_media(convert_dirs[dir_type], conn)
-        existing_media = [media[0] for media in existing_media]
+        existing_media = set([media[0] for media in existing_media])
         dirs = os.listdir(f"/media/{dir_type}")
         c = 0
         for show in dirs:
@@ -47,6 +47,12 @@ def fill_database():
 
             media_path = os.path.join(f"/media/{dir_type}", show)
             add_media_to_db(conn, media_path, convert_dirs[dir_type])
+            
+        for show in existing_media:
+            # remove media that are not in the directory anymore
+            if show not in dirs:
+                print(f"Removing {show} from database")
+                dbf.remove_from_tables(conn, convert_dirs[dir_type], show)
 
 
 if __name__ == '__main__':
