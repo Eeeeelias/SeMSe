@@ -3,11 +3,11 @@ import { MediaService, Size } from "~/generated-api"
 import { fetchAtom } from "./utils/fetchAtom"
 
 const mockedSize: Size = {
-  tv_shows: 176,
-  animes: 283,
-  movies: 792,
-  descriptions: 14860,
-  subtitles: 392329,
+  tv_shows: 0,
+  animes: 0,
+  movies: 0,
+  descriptions: 0,
+  subtitles: 0,
 }
 
 const loadSize = async () => MediaService.getSize().catch(() => mockedSize)
