@@ -1,18 +1,21 @@
-import { Dispatch } from "preact/hooks"
+import { Dispatch, useState } from "preact/hooks"
 
 import { cn } from "~/utils/cn"
 
 import { Action, AlertProps, Decorator } from "./Decorator"
 import { FocusHandlerProps } from "../base/BaseProps"
+import { Icon } from "../base/Icon"
 import { Dropdown } from "../dropdown/Dropdown"
 
 interface SelectTriggerProps extends FocusHandlerProps {
   placeholder: string
   value?: string
+  open?: boolean
 }
 const SelectTrigger = ({
   placeholder,
   value,
+  open,
   ...delegated
 }: SelectTriggerProps) => (
   <Dropdown.Trigger>
@@ -26,6 +29,11 @@ const SelectTrigger = ({
     >
       {/* eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing */}
       {value || placeholder}
+      {open ? (
+        <Icon icon="caret-down" className="text-text ml-2" />
+      ) : (
+        <Icon icon="caret-up" className="text-text mb-1 ml-2" />
+      )}
     </button>
   </Dropdown.Trigger>
 )
@@ -72,6 +80,7 @@ export const Select = ({
   label,
   ...delegated
 }: SelectProps) => {
+  const [open, setOpen] = useState(false)
   return (
     <Decorator.Border action={action} alert={alert}>
       <Decorator.Label
@@ -82,8 +91,10 @@ export const Select = ({
         <Dropdown.Root
           placement="bottom-start"
           interactions={{ role: "listbox" }}
+          open={open}
+          onOpenChange={setOpen}
         >
-          <SelectTrigger {...delegated} placeholder={placeholder} />
+          <SelectTrigger {...delegated} open={open} placeholder={placeholder} />
           <SelectDropdown options={options} onSelect={onChange} />
         </Dropdown.Root>
       </Decorator.Label>
