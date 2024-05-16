@@ -1,5 +1,6 @@
 import { glob } from "goober/global"
 
+import { SearchInputs } from "./page/SearchInputs"
 import { SizeKpis } from "./page/SizeKpis"
 import * as patterns from "./utils/patterns"
 
@@ -26,6 +27,7 @@ export const App = () => {
       </p>
 
       <SizeKpis />
+      <SearchInputs />
     </div>
   )
 }
