@@ -13,26 +13,26 @@
     "prepare": "bun openapi:gen"
   },
   "dependencies": {
-    "@floating-ui/react": "^0.26.13",
-    "@yaasl/devtools": "^0.8.0-alpha.3",
-    "@yaasl/preact": "^0.8.0-alpha.3",
+    "@floating-ui/react": "^0.26.15",
+    "@yaasl/devtools": "^0.8.0",
+    "@yaasl/preact": "^0.8.0",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.1",
     "goober": "^2.1.14",
-    "preact": "^10.19.6",
+    "preact": "^10.22.0",
     "tailwind-merge": "^2.3.0"
   },
   "devDependencies": {
-    "@hey-api/openapi-ts": "^0.43.2",
+    "@hey-api/openapi-ts": "^0.45.1",
     "@preact/preset-vite": "^2.8.2",
     "@pretty-cozy/eslint-config": "^0.3.0",
-    "@redocly/cli": "^1.12.0",
+    "@redocly/cli": "^1.12.2",
     "@tailwindcss/typography": "^0.5.13",
     "autoprefixer": "^10.4.19",
     "eslint": "8.57.0",
     "tailwindcss": "^3.4.3",
-    "typescript": "^5.2.2",
-    "vite": "^5.2.0"
+    "typescript": "^5.4.5",
+    "vite": "^5.2.11"
   },
   "eslintConfig": {
     "extends": [
