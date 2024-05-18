@@ -59,6 +59,7 @@ def create_tables(conn):
             DescriptionID SERIAL PRIMARY KEY,
             EpisodeID VARCHAR(255),
             PlainText TEXT NOT NULL,
+            EpisodeTitle VARCHAR(255),
             Embedding vector({vector_length}) NOT NULL,
             Part INT,
             TVShowID INT,
@@ -75,6 +76,7 @@ def create_tables(conn):
             Language VARCHAR(255) NOT NULL,
             Timestamp VARCHAR(255) NOT NULL,
             PlainText TEXT NOT NULL,
+            EpisodeTitle VARCHAR(255),
             Embedding vector({vector_length}) NOT NULL,
             Part INT,
             TVShowID INT,
@@ -119,18 +121,19 @@ def insert_into_table(conn, table_name, table_type, data):
         if table_type == "descriptions":
             cursor.execute(
                 f"""
-                INSERT INTO Descriptions (EpisodeID, PlainText, Embedding, Part, {table_name_single}ID)
-                VALUES (%s, %s, %s, %s, %s)
+                INSERT INTO Descriptions (EpisodeID, PlainText, episodeTitle, Embedding, Part, {table_name_single}ID)
+                VALUES (%s, %s, %s, %s, %s, %s)
                 """,
-                (data['episode_id'], data['plain_text'], str_embedding, data['part'], show_id)
+                (data['episode_id'], data['plain_text'], data['episode_title'], str_embedding, data['part'], show_id)
             )
         elif table_type == "subtitles":
             cursor.execute(
                 f"""
-                INSERT INTO Subtitles (EpisodeID, Language, Timestamp, PlainText, Embedding, Part, {table_name_single}ID)
-                VALUES (%s, %s, %s, %s, %s, %s, %s)
+                INSERT INTO Subtitles (EpisodeID, Language, Timestamp, PlainText, episodeTitle, Embedding, Part, 
+                {table_name_single}ID)
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
                 """,
-                (data['episode_id'], data['language'], data['timestamp'], data['plain_text'],
+                (data['episode_id'], data['language'], data['timestamp'], data['plain_text'], data['episode_title'],
                  str_embedding, data['part'], show_id)
             )
     conn.commit()
@@ -157,6 +160,7 @@ def remove_from_tables(conn, table_name, title):
                 (show_id, show_id, show_id)
             )
     conn.commit()
+
 
 def insert_into_images(conn, file_path):
     uuid = str(uuid4())

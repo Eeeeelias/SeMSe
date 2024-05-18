@@ -47,7 +47,7 @@ def fill_database():
 
             media_path = os.path.join(f"/media/{dir_type}", show)
             add_media_to_db(conn, media_path, convert_dirs[dir_type])
-            
+
         for show in existing_media:
             # remove media that are not in the directory anymore
             if show not in dirs:

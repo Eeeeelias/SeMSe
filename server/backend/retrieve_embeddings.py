@@ -84,7 +84,12 @@ def retrieve_description(root, file, movie=False) -> dict | None:
         plot = data.split("<plot>")[1].split("</plot>")[0]
     except IndexError:
         return None
-    return {str(uuid4()): {"episode_id": episode_id, "description": plot}}
+    try:
+        # get the <title> tag
+        title = data.split("<title>")[1].split("</title>")[0]
+    except IndexError:
+        title = ''
+    return {str(uuid4()): {"episode_id": episode_id, "description": plot, "episode_title": title}}
 
 
 def retrieve_subtitles(root, file, movie=False):
@@ -147,12 +152,17 @@ def retrieve_media(path, table_name) -> (dict, dict):
     movie = True if table_name == "Movies" else False
     descriptions, subtitles = extract_raw_info(path, movie=movie)
     show_title = os.path.basename(path)
+    episode_titles = {}
     if movie:
         # replace all episode ids with empty string
         for key in descriptions.keys():
             descriptions[key]['episode_id'] = ""
         for key in subtitles.keys():
             subtitles[key]['episode_id'] = ""
+    else:
+        # make a dictionary of episode_id with associated title in the descriptions to use later
+        episode_titles = {descriptions[key]['episode_id']: descriptions[key]['episode_title']
+                          for key in descriptions.keys()}
 
     num_langs = len(set([subtitles[key]['language'] for key in subtitles.keys()]))
     print(f"Found {len(descriptions)} descriptions and {len(subtitles)} conversations "
@@ -161,15 +171,16 @@ def retrieve_media(path, table_name) -> (dict, dict):
     desc_embeddings = {}
     sub_embeddings = {}
     for idx, key in enumerate(descriptions.keys()):
-        text_parts, encoded_text = encode_text(descriptions[key]['description'])
+        text_parts, encoded_text = encode_text(descriptions[key].get('description'))
         if len(encoded_text) > 1:
             for i, text in enumerate(encoded_text):
-                desc_embeddings[f"{idx}_{i}"] = {'title': show_title, 'episode_id': descriptions[key]['episode_id'],
+                desc_embeddings[f"{idx}_{i}"] = {'title': show_title, 'episode_id': descriptions[key].get('episode_id'),
                                                  'plain_text': text_parts[i],
+                                                 'episode_title': episode_titles.get(descriptions[key].get('episode_id'), ""),
                                                  'embedding': text, 'part': i}
         else:
-            desc_embeddings[idx] = {'title': show_title, 'episode_id': descriptions[key]['episode_id'],
-                                    'plain_text': descriptions[key]['description'],
+            desc_embeddings[idx] = {'title': show_title, 'episode_id': descriptions[key].get('episode_id'),
+                                    'plain_text': descriptions[key].get('description'),
                                     'embedding': encoded_text[0], 'part': None}
 
     for idx, key in enumerate(subtitles.keys()):
@@ -177,17 +188,19 @@ def retrieve_media(path, table_name) -> (dict, dict):
         if len(encoded_text) > 1:
             for i, text in enumerate(encoded_text):
                 sub_embeddings[f"{idx}_{i}"] = {'title': show_title,
-                                                'episode_id': subtitles[key]['episode_id'],
+                                                'episode_id': subtitles[key].get('episode_id'),
                                                 'timestamp': f"{subtitles[key]['start']} - {subtitles[key]['end']}",
                                                 'plain_text': text_parts[i],
-                                                'language': subtitles[key]['language'],
+                                                'episode_title': episode_titles.get(subtitles[key].get('episode_id'), ""),
+                                                'language': subtitles[key].get('language'),
                                                 'embedding': text,
                                                 'part': i}
         else:
-            sub_embeddings[idx] = {'title': show_title, 'episode_id': subtitles[key]['episode_id'],
+            sub_embeddings[idx] = {'title': show_title, 'episode_id': subtitles[key].get('episode_id'),
                                    'timestamp': f"{subtitles[key]['start']} - {subtitles[key]['end']}",
-                                   'plain_text': subtitles[key]['plain_text'],
-                                   'language': subtitles[key]['language'],
+                                   'plain_text': subtitles[key].get('description'),
+                                   'episode_title': episode_titles.get(subtitles[key].get('episode_id'), ""),
+                                   'language': subtitles[key].get('language'),
                                    'embedding': encoded_text[0], 'part': None}
 
     return desc_embeddings, sub_embeddings
