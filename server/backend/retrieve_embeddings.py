@@ -181,6 +181,7 @@ def retrieve_media(path, table_name) -> (dict, dict):
         else:
             desc_embeddings[idx] = {'title': show_title, 'episode_id': descriptions[key].get('episode_id'),
                                     'plain_text': descriptions[key].get('description'),
+                                    'episode_title': episode_titles.get(descriptions[key].get('episode_id'), ""),
                                     'embedding': encoded_text[0], 'part': None}
 
     for idx, key in enumerate(subtitles.keys()):
@@ -198,7 +199,7 @@ def retrieve_media(path, table_name) -> (dict, dict):
         else:
             sub_embeddings[idx] = {'title': show_title, 'episode_id': subtitles[key].get('episode_id'),
                                    'timestamp': f"{subtitles[key]['start']} - {subtitles[key]['end']}",
-                                   'plain_text': subtitles[key].get('description'),
+                                   'plain_text': subtitles[key].get('plain_text'),
                                    'episode_title': episode_titles.get(subtitles[key].get('episode_id'), ""),
                                    'language': subtitles[key].get('language'),
                                    'embedding': encoded_text[0], 'part': None}
