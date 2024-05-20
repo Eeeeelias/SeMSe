@@ -1,3 +1,5 @@
+import json
+
 from django.http import JsonResponse, HttpResponse
 from django.views.decorators.csrf import ensure_csrf_cookie
 from backend.retrieve_images import convert_image
@@ -5,7 +7,11 @@ import backend.database_functions as dbf
 import backend.user_query as uq
 import os
 
+
 # put in all api calls here
+@ensure_csrf_cookie
+def set_csrf_cookie(request):
+    return JsonResponse({'detail': 'CSRF cookie sent'}, status=200)
 
 
 def get_all_media(request):
@@ -49,7 +55,6 @@ def get_media_dict(media):
 
 
 def query_media(request):
-    data = request.POST
     keys_defaults = {
         'query': None,
         'table': None,
@@ -59,6 +64,13 @@ def query_media(request):
         'season': None,
         'language': None
     }
+    if request.content_type == 'application/json':
+        try:
+            data = json.loads(request.body)
+        except json.JSONDecodeError:
+            return JsonResponse({'error': 'Invalid JSON provided'}, status=400)
+    else:
+        data = request.POST
 
     # Get values from data or use default
     params = {key: data.get(key, default) for key, default in keys_defaults.items()}
@@ -85,7 +97,6 @@ def query_media(request):
     return JsonResponse(query_result)
 
 
-@ensure_csrf_cookie
 def test_api(request):
     # fuck django templates
     with open('semse_api/template.html', 'r') as f:

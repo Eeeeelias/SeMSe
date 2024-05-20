@@ -20,6 +20,18 @@ tags:
   - name: image
     description: Get images of episodes
 paths:
+  /token:
+    get:
+      summary: Enables user to claim a csrf token
+      description: Claim a csrf token for the current session and add it to the query header
+      operationId: getToken
+      responses:
+        '200':
+          description: Successful retrieval
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CSRF'
   /media:
     get:
       tags:
@@ -136,6 +148,13 @@ components:
           type: string
           description: Error fetching data from database
           example: 'there was an error fetching the results from the database'
+    CSRF:
+      type: object
+      properties:
+        detail:
+          type: string
+          description: Token was sent successfully in the cookies of the response
+          example: CSRF cookie sent
     Media:
       type: object
       properties:
