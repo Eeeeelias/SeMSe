@@ -189,7 +189,7 @@ def query_description(conn: psycopg2.connect, query: np.ndarray, show: str = Non
 
     sql_string = f"""
     WITH TopDescriptions AS (
-            SELECT t.Title, d.EpisodeID, d.Part, d.{id_name}
+            SELECT t.Title, d.EpisodeID, d.episodetitle, d.Part, d.{id_name}
             FROM {table} AS t
             JOIN Descriptions AS d ON t.{id_name} = d.{id_name}
             {where_title}
@@ -197,7 +197,7 @@ def query_description(conn: psycopg2.connect, query: np.ndarray, show: str = Non
             ORDER BY d.Embedding <=> %s
             LIMIT %s OFFSET %s
             )
-    SELECT td.Title, d.EpisodeID, d.PlainText, d.Embedding, d.Part
+    SELECT td.Title, d.EpisodeID, d.PlainText, d.episodetitle, d.Embedding, d.Part
     FROM Descriptions AS d
     JOIN TopDescriptions AS td ON d.{id_name} = td.{id_name} AND d.EpisodeID = td.EpisodeID
     """
@@ -223,7 +223,7 @@ def query_subtitle(conn: psycopg2.connect, query: np.ndarray, show: str = None,
     season = season + "%" if season else ""
     sql_string = f"""
     WITH TopSubtitles AS (
-            SELECT t.Title, d.EpisodeID, d.Language, d.Timestamp, d.PlainText, d.Embedding, d.part, d.{table_id}
+            SELECT t.Title, d.EpisodeID, d.Language, d.Timestamp, d.PlainText, d.episodetitle, d.Embedding, d.part, d.{table_id}
             FROM {table} AS t
             JOIN Subtitles AS d ON t.{table_id} = d.{table_id}
             {where_title}
@@ -232,7 +232,7 @@ def query_subtitle(conn: psycopg2.connect, query: np.ndarray, show: str = None,
             ORDER BY d.Embedding <=> %s
             LIMIT %s OFFSET %s
             )
-    SELECT td.Title, d.EpisodeID, d.Language, d.Timestamp, d.PlainText, d.Embedding, d.part
+    SELECT td.Title, d.EpisodeID, d.Language, d.Timestamp, d.PlainText, d.episodetitle, d.Embedding, d.part
     FROM Subtitles AS d
     JOIN TopSubtitles AS td ON d.{table_id} = td.{table_id} AND d.timestamp = td.timestamp AND d.EpisodeID = td.EpisodeID
             """

@@ -65,6 +65,7 @@ def query_media(request):
 
     # Check for required parameters
     if not params['query'] or not params['table']:
+        print("Missing params:", params['query'], params['table'])
         return JsonResponse({'error': 'No query or table provided'}, status=400)
 
     if params['table'] not in ['Animes', 'Movies', 'TVShows']:

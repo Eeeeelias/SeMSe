@@ -297,6 +297,10 @@ components:
                 description: |-
                   Indicates the exact match if the conversation is longer.
                 example: null
+              episodeTitle:
+                type: string
+                description: The title of the episode
+                example: Gossip
               similarity:
                 type: number
                 description: The similarity score of the result.
