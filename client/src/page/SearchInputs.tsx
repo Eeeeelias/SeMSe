@@ -1,6 +1,6 @@
 import { createContext, JSX } from "preact"
 
-import { useContext, useState } from "preact/hooks"
+import { Dispatch, useContext, useState } from "preact/hooks"
 
 import { ChildrenProp } from "~/components/base/BaseProps"
 import { Icon } from "~/components/base/Icon"
@@ -13,7 +13,7 @@ import { MenuButton } from "~/components/MenuButton"
 import { cn } from "~/utils/cn"
 import { hstack, surface } from "~/utils/styles"
 
-interface FiltersState {
+export interface FiltersState {
   query: string
   table: string
   title?: string
@@ -194,7 +194,7 @@ const inputs: Record<string, InputConfig> = {
 const getRequiredInputs = () =>
   Object.values(inputs).filter(({ required }) => required)
 
-const SearchButton = () => {
+const SearchButton = ({ onSubmit }: SearchSubmitProp) => {
   const { filters } = useFilters()
 
   const isValid = getRequiredInputs().every(
@@ -202,7 +202,7 @@ const SearchButton = () => {
   )
 
   return (
-    <Button kind="key" disabled={!isValid} onClick={() => console.log(filters)}>
+    <Button kind="key" disabled={!isValid} onClick={() => onSubmit(filters)}>
       <Icon icon="search" />
       Search
     </Button>
@@ -264,7 +264,10 @@ export const FilterInputs = () => {
   )
 }
 
-export const SearchInputs = () => (
+interface SearchSubmitProp {
+  onSubmit: Dispatch<FiltersState>
+}
+export const SearchInputs = ({ onSubmit }: SearchSubmitProp) => (
   <FilterProvider>
     <div
       className={cn(
@@ -275,7 +278,7 @@ export const SearchInputs = () => (
     >
       <p className={"pt-2"}>Filters:</p>
       <FilterInputs />
-      <SearchButton />
+      <SearchButton onSubmit={onSubmit} />
     </div>
   </FilterProvider>
 )

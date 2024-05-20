@@ -1,6 +1,9 @@
 import { glob } from "goober/global"
+import { useState } from "preact/hooks"
 
-import { SearchInputs } from "./page/SearchInputs"
+import { toast } from "./components/Toaster"
+import { PostQueryData, QueryResult, QueryService } from "./generated-api"
+import { FiltersState, SearchInputs } from "./page/SearchInputs"
 import { SizeKpis } from "./page/SizeKpis"
 import * as patterns from "./utils/patterns"
 
@@ -13,6 +16,26 @@ glob`
 `
 
 export const App = () => {
+  const [results, setResults] = useState<QueryResult | null>(null)
+
+  const sendQuery = (filters: FiltersState) => {
+    const requestBody: PostQueryData["requestBody"] = {
+      ...filters,
+      type: (filters.type ?? "both") as "both",
+      season: filters.season != null ? filters.season.toString() : undefined,
+    }
+
+    QueryService.postQuery({ requestBody })
+      .then(setResults)
+      .catch(error => {
+        toast({
+          kind: "error",
+          title: "Error occured!",
+          message: String(error),
+        })
+      })
+  }
+
   return (
     <div className="m-auto max-w-[100vw] px-4">
       <div className="py-20 text-center">
@@ -27,7 +50,13 @@ export const App = () => {
       </p>
 
       <SizeKpis />
-      <SearchInputs />
+      <SearchInputs onSubmit={sendQuery} />
+
+      {results && (
+        <div className="mt-10">
+          <pre>{JSON.stringify(results, null, 2)}</pre>
+        </div>
+      )}
     </div>
   )
 }
