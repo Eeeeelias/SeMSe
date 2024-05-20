@@ -33,7 +33,7 @@ const colorTokens = {
   },
   alert: {
     error: red[400],
-    warning: yellow[400],
+    warn: yellow[400],
     info: blue[400],
     success: green[400],
   },
