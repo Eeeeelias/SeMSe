@@ -11,11 +11,23 @@ const icon = cva("inline-block shrink-0", {
     size: {
       sm: "size-3",
       md: "size-4",
-      lg: "size-6",
+      lg: "size-5",
+      xl: "size-6",
     },
     fill: {
       true: "fill-current",
       false: "fill-transparent",
+    },
+    color: {
+      default: "text-text",
+      gentle: "text-text-gentle",
+      highlight: "text-text-highlight",
+      surface: "text-text-surface",
+
+      info: "text-alert-info",
+      warn: "text-alert-warn",
+      error: "text-alert-error",
+      success: "text-alert-success",
     },
   },
   defaultVariants: {
@@ -33,13 +45,14 @@ export const Icon = ({
   className,
   fill,
   size,
+  color,
   ...delegated
 }: IconProps) => {
   // eslint-disable-next-line @typescript-eslint/no-use-before-define
   const { path } = icons[iconName]
   return (
     <svg
-      className={cn(icon({ fill, size }), className)}
+      className={cn(icon({ fill, size, color }), className)}
       xmlns="http://www.w3.org/2000/svg"
       viewBox="0 0 24 24"
       stroke={"currentColor"}
