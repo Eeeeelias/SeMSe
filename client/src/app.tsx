@@ -5,6 +5,7 @@ import { Loading } from "./components/Loading"
 import { toast } from "./components/Toaster"
 import { PostQueryData, QueryResult, QueryService } from "./generated-api"
 import { FiltersState, SearchInputs } from "./page/SearchInputs"
+import { SearchResult } from "./page/SearchResult"
 import { SizeKpis } from "./page/SizeKpis"
 import * as patterns from "./utils/patterns"
 
@@ -63,8 +64,8 @@ export const App = () => {
       )}
 
       {results && (
-        <div className="mt-10">
-          <pre>{JSON.stringify(results, null, 2)}</pre>
+        <div className="m-auto my-10 max-w-6xl">
+          <SearchResult results={results} />
         </div>
       )}
     </div>
