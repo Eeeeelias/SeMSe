@@ -1,6 +1,7 @@
 import { glob } from "goober/global"
 import { useState } from "preact/hooks"
 
+import { Loading } from "./components/Loading"
 import { toast } from "./components/Toaster"
 import { PostQueryData, QueryResult, QueryService } from "./generated-api"
 import { FiltersState, SearchInputs } from "./page/SearchInputs"
@@ -16,6 +17,7 @@ glob`
 `
 
 export const App = () => {
+  const [state, setState] = useState<"init" | "pending" | "idle">("init")
   const [results, setResults] = useState<QueryResult | null>(null)
 
   const sendQuery = (filters: FiltersState) => {
@@ -25,6 +27,8 @@ export const App = () => {
       season: filters.season != null ? filters.season.toString() : undefined,
     }
 
+    setState("pending")
+    setResults(null)
     QueryService.postQuery({ requestBody })
       .then(setResults)
       .catch(error => {
@@ -34,6 +38,7 @@ export const App = () => {
           message: String(error),
         })
       })
+      .finally(() => setState("idle"))
   }
 
   return (
@@ -51,6 +56,12 @@ export const App = () => {
 
       <SizeKpis />
       <SearchInputs onSubmit={sendQuery} />
+
+      {state === "pending" && (
+        <div className="m-auto my-10 size-60">
+          <Loading size="lg" />
+        </div>
+      )}
 
       {results && (
         <div className="mt-10">
