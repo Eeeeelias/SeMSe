@@ -1,3 +1,4 @@
+import { VariantProps, cva } from "class-variance-authority"
 import { css, keyframes } from "goober"
 import { useEffect, useState } from "preact/hooks"
 
@@ -13,9 +14,21 @@ const circle = css`
   animation: ${strokeOffset} 2s ease-in-out infinite;
 `
 
-export const Loading = () => {
+const spinner = cva("stroke-text-gentle", {
+  variants: {
+    size: {
+      sm: "size-8",
+      md: "size-12",
+      lg: "size-24",
+    },
+  },
+  defaultVariants: {
+    size: "md",
+  },
+})
+
+export const Loading = ({ size }: VariantProps<typeof spinner>) => {
   const [defer, setDefer] = useState(true)
-  console.log("Loading", defer)
 
   useEffect(() => {
     if (!defer) return
@@ -27,7 +40,7 @@ export const Loading = () => {
       <svg
         viewBox="0 0 24 24"
         xmlns="http://www.w3.org/2000/svg"
-        className="stroke-text-gentle size-24"
+        className={cn(spinner({ size }))}
       >
         <g className="origin-center animate-spin duration-1000">
           <circle
