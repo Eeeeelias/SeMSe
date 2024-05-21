@@ -288,47 +288,44 @@ components:
         - table
         - type
     QueryResult:
-      results:
-        type: array
-        items:
-          type: object
-          properties:
-            title:
-              type: string
-              description: The title of the TV show.
-              example: The Office US
-            episodeId:
-              type: string
-              description: The episode ID of the result.
-              example: S06E01
-            timestamp:
-              type: string
-              description: The timestamp of the result.
-              example: 00:01:30,466 - 00:01:35,304
-            text:
-              type: string
-              description: The text content of the result.
-              example: WHOO! - AHH! PARKOUR!
-            exactMatch:
-              type: string
-              description: |-
-                Indicates the exact match if the conversation is longer.
-              example: null
-            episodeTitle:
-              type: string
-              description: The title of the episode
-              example: Gossip
-            similarity:
-              type: number
-              description: The similarity score of the result.
-              example: 0.7835047830301809
-            type:
-              type: string
-              description: The type of the result.
-              example: conversation
-            imageId:
-              type: string
-              description: The ID of the associated episode image.
-              example: b91d3e54-3dfe-4995-8c8e-6ad6df705b63
-      required:
-        - results
+      type: array
+      items:
+        type: object
+        properties:
+          title:
+            type: string
+            description: The title of the TV show.
+            example: The Office US
+          episodeId:
+            type: string
+            description: The episode ID of the result.
+            example: S06E01
+          timestamp:
+            type: string
+            description: The timestamp of the result.
+            example: 00:01:30,466 - 00:01:35,304
+          text:
+            type: string
+            description: The text content of the result.
+            example: WHOO! - AHH! PARKOUR!
+          exactMatch:
+            type: string
+            description: |-
+              Indicates the exact match if the conversation is longer.
+            example: null
+          episodeTitle:
+            type: string
+            description: The title of the episode
+            example: Gossip
+          similarity:
+            type: number
+            description: The similarity score of the result.
+            example: 0.7835047830301809
+          type:
+            type: string
+            description: The type of the result.
+            example: conversation
+          imageId:
+            type: string
+            description: The ID of the associated episode image.
+            example: b91d3e54-3dfe-4995-8c8e-6ad6df705b63
