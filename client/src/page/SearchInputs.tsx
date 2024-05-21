@@ -19,7 +19,7 @@ export interface FiltersState {
   show?: string
   language?: string
   type?: string
-  season?: number | null
+  season?: string
 }
 const Context = createContext<null | {
   filters: FiltersState
@@ -142,8 +142,12 @@ const SeasonInput = (props: InputProps) => {
     <NumberInput
       placeholder="42"
       max={99}
-      value={filters.season}
-      onChange={setFilter("season")}
+      value={parseInt(filters.season ?? "0")}
+      onChange={value =>
+        setFilter("season")(
+          !value ? undefined : `S${value.toString().padStart(2, "0")}`
+        )
+      }
       {...props}
     />
   )

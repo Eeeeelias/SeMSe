@@ -24,7 +24,6 @@ export const App = () => {
     const requestBody: PostQueryData["requestBody"] = {
       ...filters,
       type: (filters.type ?? "both") as "both",
-      season: filters.season != null ? filters.season.toString() : undefined,
     }
 
     setState("pending")
