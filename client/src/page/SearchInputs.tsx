@@ -16,7 +16,7 @@ import { hstack, surface } from "~/utils/styles"
 export interface FiltersState {
   query: string
   table: string
-  title?: string
+  show?: string
   language?: string
   type?: string
   season?: number | null
@@ -100,8 +100,8 @@ const TitleInput = (props: InputProps) => {
   return (
     <TextInput
       placeholder="The Office"
-      value={filters.title}
-      onChange={setFilter("title")}
+      value={filters.show}
+      onChange={setFilter("show")}
       {...props}
     />
   )
@@ -169,9 +169,9 @@ const inputs: Record<string, InputConfig> = {
     required: true,
     component: TableInput,
   },
-  title: {
+  show: {
     label: "Title",
-    value: "title",
+    value: "show",
     component: TitleInput,
   },
   language: {
