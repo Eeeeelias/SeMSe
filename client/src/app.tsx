@@ -2,6 +2,7 @@ import { glob } from "goober/global"
 import { useState } from "preact/hooks"
 
 import { Loading } from "./components/Loading"
+import { NoData } from "./components/NoData"
 import { toast } from "./components/Toaster"
 import { PostQueryData, QueryResult, QueryService } from "./generated-api"
 import { FiltersState, SearchInputs } from "./page/SearchInputs"
@@ -57,17 +58,25 @@ export const App = () => {
       <SizeKpis />
       <SearchInputs onSubmit={sendQuery} />
 
+      {state === "init" && (
+        <div className="m-auto mb-10 mt-20 w-max">
+          <NoData label="Nothing to see here yet, use the filters to search for some media!" />
+        </div>
+      )}
+
       {state === "pending" && (
         <div className="m-auto my-10 size-60">
           <Loading size="lg" />
         </div>
       )}
 
-      {results && (
+      {results ? (
         <div className="m-auto my-10 max-w-6xl">
           <SearchResult results={results} />
         </div>
-      )}
+      ) : state === "idle" ? (
+        <NoData label="No results found" />
+      ) : null}
     </div>
   )
 }
