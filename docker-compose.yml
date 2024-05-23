@@ -25,6 +25,14 @@ services:
         depends_on:
             - pgvecto-rs
 
+    semse-client:
+        build:
+            context: ./
+            dockerfile: ./client/Dockerfile
+        container_name: semse-client
+        ports:
+            - "5173:80"
+
 networks:
     semse_db_net:
         driver: bridge
