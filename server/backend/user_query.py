@@ -89,8 +89,7 @@ def query_db(query: str, show: str = None, table: str = None,
         results = {**results_desc, **results_sub}
 
     # sort results by similarity
-    results = {k: v for k, v in sorted(results.items(), key=lambda item: item[1]['similarity'], reverse=True)}
-    return results
+    return [v for v in sorted(results.values(), key=lambda x: x['similarity'], reverse=True)]
 
 
 def subtitle_query(conn, embed_query: np.ndarray, show: str = None,

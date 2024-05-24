@@ -96,7 +96,7 @@ def query_media(request):
         query_result = {'error': 'there was an error fetching the results from the database'}
         return JsonResponse(query_result, status=501)
     print(f"... found {len(query_result)} entries")
-    return JsonResponse(query_result)
+    return JsonResponse(query_result, safe=False)
 
 
 def test_api(request):
