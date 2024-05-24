@@ -1,7 +1,7 @@
 import json
 
 from django.http import JsonResponse, HttpResponse
-from django.views.decorators.csrf import ensure_csrf_cookie
+from django.views.decorators.csrf import csrf_exempt
 from backend.retrieve_images import convert_image
 import backend.database_functions as dbf
 import backend.user_query as uq
@@ -9,9 +9,6 @@ import os
 from datetime import datetime
 
 # put in all api calls here
-@ensure_csrf_cookie
-def set_csrf_cookie(request):
-    return JsonResponse({'detail': 'CSRF cookie sent'}, status=200)
 
 
 def get_all_media(request):
@@ -54,6 +51,7 @@ def get_media_dict(media):
     return all_info
 
 
+@csrf_exempt
 def query_media(request):
     keys_defaults = {
         'query': None,
@@ -74,6 +72,8 @@ def query_media(request):
 
     # Get values from data or use default
     params = {key: data.get(key, default) for key, default in keys_defaults.items()}
+    if params['table'] == 'TV Shows':
+        params['table'] = 'TVShows'
 
     # Check for required parameters
     if not params['query'] or not params['table']:
