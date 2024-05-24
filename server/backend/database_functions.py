@@ -22,6 +22,7 @@ def get_conn():
 
 def init_db(conn):
     enable_extension(conn, "vectors")
+    enable_extension(conn, "pg_trgm")
     create_tables(conn)
     print("Database initialized successfully")
 
@@ -100,6 +101,12 @@ def create_tables(conn):
             CREATE INDEX IF NOT EXISTS movie_title_index ON Movies(Title);
             """
         )
+        for lang in WANTED_LANGUAGES:
+            cursor.execute(
+                f"""
+                CREATE INDEX IF NOT EXISTS idx_gin_content_{lang.lower()} ON Subtitles USING to_tsvector('{lang}', plaintext);
+                """
+            )
     conn.commit()
 
 
@@ -239,6 +246,76 @@ def query_subtitle(conn: psycopg2.connect, query: np.ndarray, show: str = None,
 
     # Parameters for the query
     params = [x for x in [show, language, season, str_embedding, limit, offset] if x not in [None, ""]]
+    try:
+        with conn.cursor() as cursor:
+            cursor.execute(sql_string, params)
+            return list(set(cursor.fetchall()))
+    except Exception as e:
+        print(e)
+        return []
+
+
+def query_description_fts(conn: psycopg2.connect, query: str, show: str = None, language: str = None,
+                          table: str = None, limit: int = 5, offset: int = 0, season: str = None):
+    if not table:
+        return ["No table specified"]
+    # table is either TVShows, Animes, or Movies
+    table_id = f"{table[:-1]}ID"
+    where_title = "WHERE t.Title = %s" if show else ""
+    and_or_where = "AND" if where_title else "WHERE"
+    season_sql = f"{and_or_where} d.EpisodeID LIKE %s" if season else ""
+    season = season + "%" if season else ""
+    and_or_where = "AND" if where_title or season_sql else "WHERE"
+    match_lang = WANTED_LANGUAGES[0] if not language else language
+
+    sql_string = f"""
+    SELECT t.Title, d.EpisodeID, d.PlainText, d.episodetitle, d.Part
+    FROM {table} AS t
+    JOIN Descriptions AS d ON t.{table_id} = d.{table_id}
+    {where_title}
+    {season_sql}
+    {and_or_where} to_tsvector(%s, d.PlainText) @@ plainto_tsquery(%s, %s)
+    LIMIT %s OFFSET %s
+    
+    """
+    params = [x for x in [show, season, match_lang, match_lang, query, limit, offset] if x not in [None, ""]]
+
+    try:
+        with conn.cursor() as cursor:
+            cursor.execute(sql_string, params)
+            return list(set(cursor.fetchall()))
+    except Exception as e:
+        print(e)
+        return []
+
+
+def query_subtitle_fts(conn: psycopg2.connect, query: str, show: str = None,
+                   table: str = None, language: str = None, limit: int = 5, offset: int = 0, season: str = None):
+    if not table:
+        return ["No table specified"]
+    table_id = f"{table[:-1]}ID"
+    where_title = "WHERE t.Title = %s" if show else ""
+    and_or_where = "AND" if where_title else "WHERE"
+    lang = f"{and_or_where} language = %s" if language else ""
+    and_or_where = "AND" if where_title or language else "WHERE"
+    season_sql = f"{and_or_where} d.EpisodeID LIKE %s" if season else ""
+    season = season + "%" if season else ""
+    and_or_where = "AND" if where_title or language or season_sql else "WHERE"
+    match_lang = WANTED_LANGUAGES[0] if not language else language
+
+    sql_string = f"""
+    SELECT t.Title, d.EpisodeID, d.Language, d.Timestamp, d.PlainText, d.episodetitle, d.Embedding, d.part
+    FROM {table} AS t
+    JOIN subtitles AS d ON t.{table_id} = d.{table_id}
+    {where_title}
+    {lang}
+    {season_sql}
+    {and_or_where} to_tsvector(%s, d.PlainText) @@ plainto_tsquery(%s, %s)
+    LIMIT %s OFFSET %s
+    """
+
+    params = [x for x in [show, language, season, match_lang, match_lang, query, limit, offset] if x not in [None, ""]]
+
     try:
         with conn.cursor() as cursor:
             cursor.execute(sql_string, params)
