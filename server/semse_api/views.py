@@ -52,7 +52,7 @@ def get_media_dict(media):
 
 
 @csrf_exempt
-def query_media(request):
+def query_media(request, fts=False):
     keys_defaults = {
         'query': None,
         'table': None,
@@ -74,6 +74,7 @@ def query_media(request):
     params = {key: data.get(key, default) for key, default in keys_defaults.items()}
     if params['table'] == 'TV Shows':
         params['table'] = 'TVShows'
+    params['type'] = params['type'].lower()
 
     # Check for required parameters
     if not params['query'] or not params['table']:
@@ -90,13 +91,21 @@ def query_media(request):
         f"show: {params['show']}, table: {params['table']}, type: {params['type']}, offset: {params['offset']}", end=" ")
 
     try:
-        query_result = uq.query_db(**params)
+        if fts:
+            query_result = uq.query_db(**params, fts=True)
+        else:
+            query_result = uq.query_db(**params)
     except Exception as e:
         print(e)
         query_result = {'error': 'there was an error fetching the results from the database'}
         return JsonResponse(query_result, status=501)
     print(f"... found {len(query_result)} entries")
     return JsonResponse(query_result, safe=False)
+
+
+@csrf_exempt
+def query_media_fts(request):
+    return query_media(request, fts=True)
 
 
 def test_api(request):

@@ -69,15 +69,14 @@ def combine_multi_part_query(query_result: list, embedded_query, type=None) -> l
 
 
 def query_db(query: str, show: str = None, table: str = None,
-             language: str = None, season=None, type='both', offset=0, conn=None):
-    if not conn:
-        conn = dbf.get_conn()
-    else:
-        conn = conn
-    # take only the first encoding
-    query = encode_text(query)[1][0]
+             language: str = None, season=None, type='both', offset=0, fts=False, conn=None):
 
-    general_data = [conn, query, show, table]
+    conn = conn if conn else dbf.get_conn()
+
+    # if full text search, don't encode the query
+    encoded_query = query if fts else encode_text(query)[1][0]
+
+    general_data = [conn, encoded_query, show, table]
 
     if type == 'description':
         results = description_query(*general_data, limit=10, offset=offset, season=season)
@@ -92,11 +91,15 @@ def query_db(query: str, show: str = None, table: str = None,
     return [v for v in sorted(results.values(), key=lambda x: x['similarity'], reverse=True)]
 
 
-def subtitle_query(conn, embed_query: np.ndarray, show: str = None,
+def subtitle_query(conn, query: np.ndarray | str, show: str = None,
                    table: str = None, language: str = 'English', limit=5, offset=0, season=None):
+    # if query is a string, it's a full text search
+    if isinstance(query, str):
+        results_sub = dbf.query_subtitle_fts(conn, query, show, table, language, limit, offset, season)
+    else:
+        results_sub = dbf.query_subtitle(conn, query, show, table, language, limit, offset, season)
 
-    results_sub = dbf.query_subtitle(conn, embed_query, show, table, language, limit, offset, season)
-    results_sub = combine_multi_part_query(results_sub, embed_query, 'conversation')
+    results_sub = combine_multi_part_query(results_sub, query, 'conversation')
     results = {}
     for idx, result in enumerate(results_sub):
         title, episode_id, _, timestamp, text, ep_title, best_match, embeddings, _ = result
@@ -116,11 +119,15 @@ def subtitle_query(conn, embed_query: np.ndarray, show: str = None,
     return results
 
 
-def description_query(conn, embed_query: np.ndarray, show: str = None,
-                      table: str = None, ex=0, limit=5, offset=0, season=None):
+def description_query(conn, query: np.ndarray | str, show: str = None,
+                      table: str = None, ex=0, limit=5, offset=0, season=None, language=None):
 
-    results_desc = dbf.query_description(conn, embed_query, show, table, limit, offset, season)
-    results_desc = combine_multi_part_query(results_desc, embed_query, 'description')
+    if isinstance(query, str):
+        results_desc = dbf.query_description_fts(conn, query, show, language, table, limit, offset, season)
+    else:
+        results_desc = dbf.query_description(conn, query, show, table, limit, offset, season)
+
+    results_desc = combine_multi_part_query(results_desc, query, 'description')
     results = {}
     for idx, result in enumerate(results_desc):
         title, episode_id, text, ep_title, best_match, embeddings, _ = result

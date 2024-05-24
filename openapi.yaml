@@ -89,7 +89,7 @@ paths:
       description: Query the database for a search
       operationId: postQuery
       requestBody:
-        description: Search a query in the database 
+        description: Search a query in the database
         content:
           application/json:
             schema:
@@ -101,7 +101,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/QueryResult'          
+                $ref: '#/components/schemas/QueryResult'
         '400':
           description: No query or table provided
         '403':
@@ -112,7 +112,38 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
-          
+  /queryPlain/:
+    post:
+      tags:
+        - query
+      summary: Query the database in plain text
+      description: Query the database for a plain text search
+      operationId: postQuery
+      requestBody:
+        description: Search a query in the database for word matches
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Query'
+        required: true
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/QueryResult'
+        '400':
+          description: No query or table provided
+        '403':
+          description: Invalid table provided
+        '501':
+          description: Database error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
   /image/{imageId}:
     get:
       tags:
