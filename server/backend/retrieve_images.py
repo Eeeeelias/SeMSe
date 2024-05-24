@@ -17,21 +17,34 @@ BASE_PATH = "media"
 
 def find_image_path(title: str, episode_id: str, library: str) -> str | None:
     season_number = episode_id.split("E")[0][2:3]
-    path = f"/{BASE_PATH}/{LIBRARY_MAP[library]}/{title}/Season {season_number}/"
+    library_type = LIBRARY_MAP[library]
+
+    # first check if it's a movie
+
+    if library_type == "Movies":
+        path = f"/{BASE_PATH}/{library_type}/{title}/"
+        if not os.path.isdir(path):
+            print('Movie not found')
+            return None
+    else:
+        # if it's not a movie, it's a TV show/Anime
+        path = f"/{BASE_PATH}/{library_type}/{title}/Season {season_number}/"
+
     # if there is a leading zero
     if not os.path.isdir(path):
         season_number = season_number.zfill(2)
-        path = f"/{BASE_PATH}/{LIBRARY_MAP[library]}/{title}/Season {season_number}/"
+        path = f"/{BASE_PATH}/{library_type}/{title}/Season {season_number}/"
         if not os.path.isdir(path):
             print("Season not found")
             return None
 
     # find the correct episode in either the folder itself or any subfolder
+    identifier = 'backdrop' if library_type == 'Movies' else episode_id
     for root, dirs, files in os.walk(path):
         for file in files:
-            if episode_id in file and file.endswith((".jpg", ".png")):
+            if identifier in file and file.endswith((".jpg", ".png")):
                 return os.path.join(root, file)
-    print("Episode not found")
+    print("Episode/Movie backdrop not found")
     return None
 
 
