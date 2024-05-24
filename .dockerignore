@@ -1,0 +1,7 @@
+db
+.git
+.gitignore
+Dockerfile
+docker-compose.yml
+*.log
+*.tmp
