@@ -3,7 +3,8 @@ import os.path
 
 import psycopg2
 
-conn = psycopg2.connect("dbname=postgres user=postgres password=secret host=192.168.0.2 port=5432")
+# change the connection string to match your db
+conn = psycopg2.connect("dbname=postgres user=postgres password=secret host=localhost port=5432")
 
 
 def add_title_column():

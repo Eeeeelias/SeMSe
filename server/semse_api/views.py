@@ -76,19 +76,23 @@ def query_media(request, fts=False):
         params['table'] = 'TVShows'
     params['type'] = params['type'].lower()
 
+    time_format = "%Y-%m-%d %H:%M:%S"
+
+    time = datetime.now().strftime(time_format)
+
     # Check for required parameters
     if not params['query'] or not params['table']:
-        print("Missing params:", params['query'], params['table'])
+        print(f"[{time}] Missing params:", params['query'], params['table'])
         return JsonResponse({'error': 'No query or table provided'}, status=400)
 
     if params['table'] not in ['Animes', 'Movies', 'TVShows']:
+        print(f"[{time}] Incorrect table: {params['table']} provided")
         return JsonResponse({'error': 'Invalid table provided'}, status=403)
 
-    time_format = "%Y-%m-%d %H:%M:%S"
-
     print(
-        f"[{datetime.now().strftime(time_format)}] Finding media with query: {params['query']}, "
-        f"show: {params['show']}, table: {params['table']}, type: {params['type']}, offset: {params['offset']}", end=" ")
+        f"[{time}] Finding media with query: '{params['query']}', show: '{params['show']}', "
+        f"table: '{params['table']}', type: '{params['type']}', offset: '{params['offset']}'",
+        end=" ")
 
     try:
         if fts:

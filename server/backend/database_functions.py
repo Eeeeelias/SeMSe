@@ -397,13 +397,15 @@ def size_of_db(conn):
         movies = cursor.fetchone()[0]
         cursor.execute(
             """
-            SELECT COUNT(*) FROM Descriptions;
+            SELECT COUNT(*) FROM Descriptions
+            WHERE part IS NULL OR part = 1;
             """
         )
         descriptions = cursor.fetchone()[0]
         cursor.execute(
             """
-            SELECT COUNT(*) FROM Subtitles;
+            SELECT COUNT(*) FROM Subtitles
+            WHERE part IS NULL OR part = 1;
             """
         )
         subtitles = cursor.fetchone()[0]

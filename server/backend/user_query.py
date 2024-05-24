@@ -32,6 +32,7 @@ def combine_parts(query_result, title, episode_id, embedded_query, timestamp=Non
 
 
 def combine_multi_part_query(query_result: list, embedded_query, type=None) -> list:
+    # TODO: make this function compatible with full text search
     combined = []
     if not any(q[-1] is not None for q in query_result):
         # eval q[-2] to make sure it's always of the correct datatype
