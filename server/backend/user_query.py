@@ -6,6 +6,13 @@ from backend.retrieve_images import map_image
 import re
 
 
+def format_episode_id(episode_id: str):
+    episode_id = episode_id.upper()
+    # remove leading zeros after 'E' if the number after is greater than 9
+    episode_id = re.sub(r'(?<=E)0+(?=\d{2,})', '', episode_id)
+    return episode_id
+
+
 def combine_parts(query_result, title, episode_id, embedded_query, timestamp=None):
     query_result.sort(key=lambda x: x[-1] if x[-1] is not None else 0)
 
@@ -43,9 +50,11 @@ def combine_multi_part_query(query_result: list, embedded_query, type=None) -> l
             if part is None:
                 similarity = compute_cosine_similarity(eval(embedding), embedded_query)
                 combined.append((title, episode_id, language, timestamp, text, ep_title, None, [similarity], None))
+
             elif part == 0:
                 combined_text, best_match, similarities = combine_parts(query_result, title, episode_id, embedded_query, timestamp)
                 combined.append((title, episode_id, language, timestamp, combined_text, ep_title, best_match, similarities, None))
+
     elif type == 'description':
         for q in query_result:
             title, episode_id, text, ep_title, embedding, part = q
@@ -55,14 +64,8 @@ def combine_multi_part_query(query_result: list, embedded_query, type=None) -> l
             else:
                 combined_text, best_match, similarities = combine_parts(query_result, title, episode_id, embedded_query)
                 combined.append((title, episode_id, combined_text, ep_title, best_match, similarities, None))
+
     return combined
-
-
-def format_episode_id(episode_id: str):
-    episode_id = episode_id.upper()
-    # remove leading zeros after 'E' if the number after is greater than 9
-    episode_id = re.sub(r'(?<=E)0+(?=\d{2,})', '', episode_id)
-    return episode_id
 
 
 def query_db(query: str, show: str = None, table: str = None,

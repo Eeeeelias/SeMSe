@@ -104,7 +104,7 @@ def create_tables(conn):
         for lang in WANTED_LANGUAGES:
             cursor.execute(
                 f"""
-                CREATE INDEX IF NOT EXISTS idx_gin_content_{lang.lower()} ON Subtitles USING to_tsvector('{lang}', plaintext);
+                CREATE INDEX IF NOT EXISTS idx_gin_content_{lang.lower()} ON Subtitles USING GIN(to_tsvector('{lang}', plaintext));
                 """
             )
     conn.commit()

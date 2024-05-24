@@ -6,7 +6,7 @@ from backend.retrieve_images import convert_image
 import backend.database_functions as dbf
 import backend.user_query as uq
 import os
-
+from datetime import datetime
 
 # put in all api calls here
 @ensure_csrf_cookie
@@ -83,9 +83,11 @@ def query_media(request):
     if params['table'] not in ['Animes', 'Movies', 'TVShows']:
         return JsonResponse({'error': 'Invalid table provided'}, status=403)
 
+    time_format = "%Y-%m-%d %H:%M:%S"
+
     print(
-        f"Finding media with query: {params['query']}, show: {params['show']}, table: {params['table']}, "
-        f"type: {params['type']}, offset: {params['offset']}", end=" ")
+        f"[{datetime.now().strftime(time_format)}] Finding media with query: {params['query']}, "
+        f"show: {params['show']}, table: {params['table']}, type: {params['type']}, offset: {params['offset']}", end=" ")
 
     try:
         query_result = uq.query_db(**params)
