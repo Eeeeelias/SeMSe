@@ -1,4 +1,4 @@
-import { atom } from "@yaasl/preact"
+import { createAtom } from "@yaasl/preact"
 
 const BREAKPOINTS = {
   mobile: 550,
@@ -34,7 +34,7 @@ const getBreakpoint = () => {
   }
 }
 
-export const breakpoint = atom({
+export const breakpoint = createAtom({
   name: "breakpoint",
   defaultValue: getBreakpoint(),
 })

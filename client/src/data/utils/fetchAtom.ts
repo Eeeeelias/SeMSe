@@ -1,5 +1,10 @@
 import { reduxDevtools } from "@yaasl/devtools"
-import { atom, localStorage, expiration, middleware } from "@yaasl/preact"
+import {
+  createAtom,
+  localStorage,
+  expiration,
+  createEffect,
+} from "@yaasl/preact"
 
 import { loadConfig } from "./loadConfig"
 
@@ -10,7 +15,7 @@ const persistance = () => [localStorage(), expiration({ expiresIn: DAY })]
 interface FetcherOptions {
   dispatch: () => Promise<unknown>
 }
-const loadValue = middleware<FetcherOptions>({
+const loadValue = createEffect<FetcherOptions>({
   didInit: ({ value, atom, options }) => {
     if (value != null) return
     return options.dispatch().then(value => atom.set(value))
@@ -29,10 +34,10 @@ export const fetchAtom = <T>({
 }: FetchAtomProps<T>) => {
   loadConfig()
 
-  return atom<T | null>({
+  return createAtom<T | null>({
     name,
     defaultValue: null,
-    middleware: [
+    effects: [
       ...(persist ? persistance() : []),
       loadValue({ dispatch }),
       reduxDevtools({ disable: !import.meta.env.DEV }),
