@@ -4,7 +4,7 @@ import { useState } from "preact/hooks"
 import { Loading } from "./components/Loading"
 import { NoData } from "./components/NoData"
 import { toast } from "./components/Toaster"
-import { PostQueryData, QueryResult, QueryService } from "./generated-api"
+import { PostQueryData, QueryResult, postQuery } from "./generated-api"
 import { FiltersState, SearchInputs } from "./page/SearchInputs"
 import { SearchResult } from "./page/SearchResult"
 import { SizeKpis } from "./page/SizeKpis"
@@ -30,7 +30,7 @@ export const App = () => {
 
     setState("pending")
     setResults(null)
-    QueryService.postQuery({ requestBody })
+    postQuery({ requestBody })
       .then(setResults)
       .catch(error => {
         toast({

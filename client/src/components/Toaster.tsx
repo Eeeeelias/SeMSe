@@ -1,4 +1,4 @@
-import { atom, useAtomValue } from "@yaasl/preact"
+import { createAtom, useAtomValue } from "@yaasl/preact"
 import { keyframes } from "goober"
 
 import { cn } from "~/utils/cn"
@@ -27,7 +27,7 @@ interface ToastState extends ToastProps {
   id: string
 }
 
-const toastsAtom = atom<ToastState[]>({
+const toastsAtom = createAtom<ToastState[]>({
   name: "toasts",
   defaultValue: [],
 })

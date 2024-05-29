@@ -1,4 +1,4 @@
-import { MediaService, Size } from "~/generated-api"
+import { getSize, Size } from "~/generated-api"
 
 import { fetchAtom } from "./utils/fetchAtom"
 
@@ -10,7 +10,7 @@ const mockedSize: Size = {
   subtitles: 0,
 }
 
-const loadSize = async () => MediaService.getSize().catch(() => mockedSize)
+const loadSize = async () => getSize().catch(() => mockedSize)
 
 export const sizeAtom = fetchAtom<Size | null>({
   name: "size",
