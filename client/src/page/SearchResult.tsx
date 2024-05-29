@@ -1,11 +1,11 @@
 import { Card } from "~/components/Card"
-import { QueryResult } from "~/generated-api"
+import { OpenAPI, QueryResult } from "~/generated-api"
 
 const getId = (result: QueryResult[number]) =>
   (result.title ?? "") + (result.episodeId ?? "") + (result.timestamp ?? "")
 
 const getImage = (result: QueryResult[number]) =>
-  result.imageId ? `https://semse.rhostruct.de/image/${result.imageId}` : ""
+  result.imageId ? `${OpenAPI.BASE}/image/${result.imageId}` : ""
 
 const formatTimeStamp = (timestamp: string) => {
   const [start, end] = timestamp.split(" - ").map(time => time.split(",")[0])
