@@ -1,16 +1,22 @@
 # this is supposed to add a title column to the existing db and populate it with the titles corresponding to each entry
 import os.path
-
+import tqdm
 import psycopg2
 
 # change the connection string to match your db
-conn = psycopg2.connect("dbname=postgres user=postgres password=secret host=localhost port=5432")
+conn = psycopg2.connect("dbname=postgres user=postgres password=secret host=192.168.192.2 port=5432")
 
 
 def add_title_column():
     cur = conn.cursor()
     cur.execute("ALTER TABLE descriptions ADD COLUMN episodeTitle VARCHAR(255)")
     cur.execute("ALTER TABLE subtitles ADD COLUMN episodeTitle VARCHAR(255)")
+    conn.commit()
+
+
+def add_runtime_column():
+    cur = conn.cursor()
+    cur.execute("ALTER TABLE subtitles ADD COLUMN runtime INT")
     conn.commit()
 
 
@@ -47,7 +53,7 @@ def get_file_path(table_name, title, episode_id):
     return
 
 
-def get_title(file_path):
+def get_tag(file_path, tag="title"):
     info_file = file_path[:-4] + ".nfo"
     if not os.path.isfile(info_file):
         print("Info file not found for ", file_path)
@@ -55,18 +61,18 @@ def get_title(file_path):
     with open(info_file, 'r') as file:
         data = file.read()
     try:
-        # get the <title> tag
-        title = data.split("<title>")[1].split("</title>")[0]
+        # get the <{tag}> tag
+        found_tag = data.split(f"<{tag}>")[1].split(f"</{tag}>")[0]
     except IndexError:
-        title = ''
-    return title
+        found_tag = ''
+    return found_tag
 
 
-def populate_title_column():
+def populate_new_column(tag="title", column="episodeTitle", tables=("descriptions", "subtitles")):
     cur = conn.cursor()
     cur.execute("SELECT episodeid, animeid, tvshowid FROM descriptions")
     rows = cur.fetchall()
-    for row in rows:
+    for row in tqdm.tqdm(rows, desc="Populating titles", unit="episodes"):
         if not row[1] and not row[2]:
             continue
         table_name = "animes" if row[1] else "tvshows"
@@ -77,19 +83,29 @@ def populate_title_column():
 
         if not file_path:
             continue
-        title = get_title(file_path)
+        title = get_tag(file_path, tag)
         if not title:
             continue
 
-        sql = f"UPDATE descriptions SET episodeTitle = %s WHERE episodeid = %s AND {id_type}id = %s"
-        sql_sub = f"UPDATE subtitles SET episodeTitle = %s WHERE episodeid = %s AND {id_type}id = %s"
-
-        cur.execute(sql, (title, row[0], id_value))
-        cur.execute(sql_sub, (title, row[0], id_value))
+        if "descriptions" in tables:
+            sql = f"UPDATE descriptions SET {column} = %s WHERE episodeid = %s AND {id_type}id = %s"
+            cur.execute(sql, (title, row[0], id_value))
+        if "subtitles" in tables:
+            sql_sub = f"UPDATE subtitles SET {column} = %s WHERE episodeid = %s AND {id_type}id = %s"
+            cur.execute(sql_sub, (title, row[0], id_value))
     conn.commit()
 
 
+def populate_runtime_column():
+    cur = conn.cursor()
+    cur.execute("SELECT episodeid, animeid, tvshowid FROM descriptions")
+    rows = cur.fetchall()
+    for row in rows:
+        if not row[1] and not row[2]:
+            continue
+
+
 if __name__ == '__main__':
-    # add_title_column()
-    populate_title_column()
+    # add_runtime_column()
+    populate_new_column(tag="runtime", column="runtime", tables=("subtitles",))
     conn.close()
