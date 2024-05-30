@@ -72,7 +72,7 @@ def populate_new_column(tag="title", column="episodeTitle", tables=("description
     cur = conn.cursor()
     cur.execute("SELECT episodeid, animeid, tvshowid FROM descriptions")
     rows = cur.fetchall()
-    for row in tqdm.tqdm(rows, desc="Populating titles", unit="episodes"):
+    for row in tqdm.tqdm(rows, desc=f"Populating {tag}s", unit="episodes"):
         if not row[1] and not row[2]:
             continue
         table_name = "animes" if row[1] else "tvshows"

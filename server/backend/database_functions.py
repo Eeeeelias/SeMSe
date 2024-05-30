@@ -1,6 +1,7 @@
 from uuid import uuid4
 import numpy as np
 import psycopg2
+from psycopg2.extras import DictCursor
 import os
 from dotenv import load_dotenv
 from backend.retrieve_embeddings import WANTED_LANGUAGES
@@ -83,6 +84,7 @@ def create_tables(conn):
             TVShowID INT,
             AnimeID INT,
             MovieID INT,
+            Runtime INT,
             FOREIGN KEY (TVShowID) REFERENCES TVShows(TVShowID),
             FOREIGN KEY (AnimeID) REFERENCES Animes(AnimeID),
             FOREIGN KEY (MovieID) REFERENCES Movies(MovieID)
@@ -137,11 +139,11 @@ def insert_into_table(conn, table_name, table_type, data):
             cursor.execute(
                 f"""
                 INSERT INTO Subtitles (EpisodeID, Language, Timestamp, PlainText, episodeTitle, Embedding, Part, 
-                {table_name_single}ID)
-                VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+                {table_name_single}ID, Runtime)
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
                 """,
                 (data['episode_id'], data['language'], data['timestamp'], data['plain_text'], data['episode_title'],
-                 str_embedding, data['part'], show_id)
+                 str_embedding, data['part'], show_id, data['runtime'])
             )
     conn.commit()
 
@@ -211,9 +213,9 @@ def query_description(conn: psycopg2.connect, query: np.ndarray, show: str = Non
     # Parameters for the query
     params = [x for x in [show, season, str_embedding, limit, offset] if x not in [None, ""]]
 
-    with conn.cursor() as cursor:
+    with conn.cursor(cursor_factory=DictCursor) as cursor:
         cursor.execute(sql_string, params)
-        return list(set(cursor.fetchall()))
+        return cursor.fetchall()
 
 
 def query_subtitle(conn: psycopg2.connect, query: np.ndarray, show: str = None,
@@ -230,7 +232,7 @@ def query_subtitle(conn: psycopg2.connect, query: np.ndarray, show: str = None,
     season = season + "%" if season else ""
     sql_string = f"""
     WITH TopSubtitles AS (
-            SELECT t.Title, d.EpisodeID, d.Language, d.Timestamp, d.PlainText, d.episodetitle, d.Embedding, d.part, d.{table_id}
+            SELECT t.Title, d.EpisodeID, d.Language, d.Timestamp, d.PlainText, d.episodetitle, d.Embedding, d.part, d.{table_id}, d.Runtime
             FROM {table} AS t
             JOIN Subtitles AS d ON t.{table_id} = d.{table_id}
             {where_title}
@@ -239,7 +241,7 @@ def query_subtitle(conn: psycopg2.connect, query: np.ndarray, show: str = None,
             ORDER BY d.Embedding <=> %s
             LIMIT %s OFFSET %s
             )
-    SELECT td.Title, d.EpisodeID, d.Language, d.Timestamp, d.PlainText, d.episodetitle, d.Embedding, d.part
+    SELECT td.Title, d.EpisodeID, d.Language, d.Timestamp, d.PlainText, d.episodetitle, d.Embedding, d.part, d.Runtime
     FROM Subtitles AS d
     JOIN TopSubtitles AS td ON d.{table_id} = td.{table_id} AND d.timestamp = td.timestamp AND d.EpisodeID = td.EpisodeID
             """
@@ -247,9 +249,9 @@ def query_subtitle(conn: psycopg2.connect, query: np.ndarray, show: str = None,
     # Parameters for the query
     params = [x for x in [show, language, season, str_embedding, limit, offset] if x not in [None, ""]]
     try:
-        with conn.cursor() as cursor:
+        with conn.cursor(cursor_factory=DictCursor) as cursor:
             cursor.execute(sql_string, params)
-            return list(set(cursor.fetchall()))
+            return cursor.fetchall()
     except Exception as e:
         print(e)
         return []
@@ -269,7 +271,7 @@ def query_description_fts(conn: psycopg2.connect, query: str, show: str = None, 
     match_lang = WANTED_LANGUAGES[0] if not language else language
 
     sql_string = f"""
-    SELECT t.Title, d.EpisodeID, d.PlainText, d.episodetitle, d.Part
+    SELECT t.Title, d.EpisodeID, d.PlainText, d.episodetitle, d.embedding, d.Part
     FROM {table} AS t
     JOIN Descriptions AS d ON t.{table_id} = d.{table_id}
     {where_title}
@@ -281,9 +283,9 @@ def query_description_fts(conn: psycopg2.connect, query: str, show: str = None, 
     params = [x for x in [show, season, match_lang, match_lang, query, limit, offset] if x not in [None, ""]]
 
     try:
-        with conn.cursor() as cursor:
+        with conn.cursor(cursor_factory=DictCursor) as cursor:
             cursor.execute(sql_string, params)
-            return list(set(cursor.fetchall()))
+            return cursor.fetchall()
     except Exception as e:
         print(e)
         return []
@@ -304,7 +306,7 @@ def query_subtitle_fts(conn: psycopg2.connect, query: str, show: str = None,
     match_lang = WANTED_LANGUAGES[0] if not language else language
 
     sql_string = f"""
-    SELECT t.Title, d.EpisodeID, d.Language, d.Timestamp, d.PlainText, d.episodetitle, d.Embedding, d.part
+    SELECT t.Title, d.EpisodeID, d.Language, d.Timestamp, d.PlainText, d.episodetitle, d.Embedding, d.part, d.runtime
     FROM {table} AS t
     JOIN subtitles AS d ON t.{table_id} = d.{table_id}
     {where_title}
@@ -317,9 +319,9 @@ def query_subtitle_fts(conn: psycopg2.connect, query: str, show: str = None,
     params = [x for x in [show, language, season, match_lang, match_lang, query, limit, offset] if x not in [None, ""]]
 
     try:
-        with conn.cursor() as cursor:
+        with conn.cursor(cursor_factory=DictCursor) as cursor:
             cursor.execute(sql_string, params)
-            return list(set(cursor.fetchall()))
+            return cursor.fetchall()
     except Exception as e:
         print(e)
         return []

@@ -16,11 +16,7 @@ else:
 
 def compute_cosine_similarity(u: np.ndarray, v: np.ndarray) -> float:
     """Compute the cosine similarity between two vectors"""
-    try:
-        return (u @ v) / (np.linalg.norm(u) * np.linalg.norm(v))
-    except Exception as e:
-        print(f"Error in computing cosine similarity: {e}")
-        return 0.0
+    return (u @ v) / (np.linalg.norm(u) * np.linalg.norm(v))
 
 
 def find_end(description_part):
@@ -93,7 +89,12 @@ def retrieve_description(root, file, movie=False) -> dict | None:
         title = data.split("<title>")[1].split("</title>")[0]
     except IndexError:
         title = ''
-    return {str(uuid4()): {"episode_id": episode_id, "description": plot, "episode_title": title}}
+    try:
+        # get the <runtime> tag
+        runtime = data.split("<runtime>")[1].split("</runtime>")[0]
+    except IndexError:
+        runtime = '0'
+    return {str(uuid4()): {"episode_id": episode_id, "description": plot, "episode_title": title, "runtime": runtime}}
 
 
 def retrieve_subtitles(root, file, movie=False):
@@ -199,13 +200,16 @@ def retrieve_media(path, table_name) -> (dict, dict):
                                                 'episode_title': episode_titles.get(subtitles[key].get('episode_id'), ""),
                                                 'language': subtitles[key].get('language'),
                                                 'embedding': text,
-                                                'part': i}
+                                                'part': i,
+                                                'runtime:': episode_titles.get(subtitles[key].get('runtime', '0'), "0")}
         else:
             sub_embeddings[idx] = {'title': show_title, 'episode_id': subtitles[key].get('episode_id'),
                                    'timestamp': f"{subtitles[key]['start']} - {subtitles[key]['end']}",
                                    'plain_text': subtitles[key].get('plain_text'),
                                    'episode_title': episode_titles.get(subtitles[key].get('episode_id'), ""),
                                    'language': subtitles[key].get('language'),
-                                   'embedding': encoded_text[0], 'part': None}
+                                   'embedding': encoded_text[0],
+                                   'part': None,
+                                   'runtime:': episode_titles.get(subtitles[key].get('runtime', '0'), "0")}
 
     return desc_embeddings, sub_embeddings

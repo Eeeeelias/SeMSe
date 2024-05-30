@@ -13,17 +13,23 @@ def format_episode_id(episode_id: str):
     return episode_id
 
 
+def compute_progress(runtime, timestamp):
+    return [75, 80]
+
+
 def combine_parts(query_result, title, episode_id, embedded_query, timestamp=None):
-    query_result.sort(key=lambda x: x[-1] if x[-1] is not None else 0)
+    query_result.sort(key=lambda x: x['part'] if x['part'] is not None else 0)
 
     combined_text = []
     embeddings = []
     for k in query_result:
-        if k[0] == title and k[1] == episode_id and (timestamp is None or k[3] == timestamp):
-            combined_text.append(k[4] + " ")
-            embeddings.append(eval(k[-2]))
-
-    similarities = [compute_cosine_similarity(embed, embedded_query) for embed in embeddings]
+        if k['title'] == title and k['episodeid'] == episode_id and (timestamp is None or k['timestamp'] == timestamp):
+            combined_text.append(k['plaintext'] + " ")
+            embeddings.append(eval(k['embedding']))
+    try:
+        similarities = [compute_cosine_similarity(embed, embedded_query) for embed in embeddings]
+    except (SyntaxError, TypeError):
+        similarities = [1 / (i + 1) for i in range(len(embeddings))]
     highest_index = similarities.index(max(similarities))
     best_match = combined_text[highest_index] if combined_text[highest_index] else None
     combined_text = " ".join(combined_text)
@@ -32,40 +38,55 @@ def combine_parts(query_result, title, episode_id, embedded_query, timestamp=Non
 
 
 def combine_multi_part_query(query_result: list, embedded_query, type=None) -> list:
-    # TODO: make this function compatible with full text search
     combined = []
+    c = 1
     if not any(q[-1] is not None for q in query_result):
         # eval q[-2] to make sure it's always of the correct datatype
         query_formatted = []
         for result in query_result:
-            computed = list(result)
-            similarity = compute_cosine_similarity(eval(result[-2]), embedded_query)
-            computed[-2] = [similarity]
-            computed.insert(-2, None)
+            try:
+                similarity = compute_cosine_similarity(eval(result['embedding']), embedded_query)
+            except (SyntaxError, TypeError):
+                similarity = 1 / c
+            computed = {**result, 'similarity': [similarity], 'best_match': None}
             query_formatted.append(computed)
+            c += 1
         return query_formatted
 
+    c = 1
     if type == 'conversation':
         for q in query_result:
-            title, episode_id, language, timestamp, text, ep_title, embedding, part = q
-            if part is None:
-                similarity = compute_cosine_similarity(eval(embedding), embedded_query)
-                combined.append((title, episode_id, language, timestamp, text, ep_title, None, [similarity], None))
+            if q['part'] is None:
+                try:
+                    similarity = compute_cosine_similarity(eval(q['embedding']), embedded_query)
+                except (SyntaxError, TypeError):
+                    similarity = 1 / c
+                combined.append({**q, 'similarity': [similarity], 'best_match': None})
 
-            elif part == 0:
-                combined_text, best_match, similarities = combine_parts(query_result, title, episode_id, embedded_query, timestamp)
-                combined.append((title, episode_id, language, timestamp, combined_text, ep_title, best_match, similarities, None))
+            elif q['part'] == 0:
+                combined_text, best_match, similarities = combine_parts(query_result, q['title'], q['episodeid'],
+                                                                        embedded_query, q['timestamp'])
+                combined.append({**q, 'similarity': similarities, 'best_match': best_match})
+
+            c += 1
 
     elif type == 'description':
-        for q in query_result:
-            title, episode_id, text, ep_title, embedding, part = q
-            if part is None:
-                similarity = compute_cosine_similarity(eval(embedding), embedded_query)
-                combined.append((title, episode_id, text, ep_title, None, [similarity], None))
-            else:
-                combined_text, best_match, similarities = combine_parts(query_result, title, episode_id, embedded_query)
-                combined.append((title, episode_id, combined_text, ep_title, best_match, similarities, None))
+        #                     title, episode_id, text, ep_title, best_match, embeddings, _ = result
 
+        for q in query_result:
+            if q['part'] is None:
+                try:
+                    similarity = compute_cosine_similarity(eval(q['embedding']), embedded_query)
+                except (SyntaxError, TypeError):
+                    similarity = 1 / c
+                combined.append({**q, 'similarity': [similarity], 'best_match': None})
+
+            else:
+                combined_text, best_match, similarities = combine_parts(query_result, q['title'],
+                                                                        q['episodeid'], embedded_query)
+                combined.append({**q, 'similarity': similarities, 'best_match': best_match})
+
+            c += 1
     return combined
 
 
@@ -103,20 +124,21 @@ def subtitle_query(conn, query: np.ndarray | str, show: str = None,
     results_sub = combine_multi_part_query(results_sub, query, 'conversation')
     results = {}
     for idx, result in enumerate(results_sub):
-        title, episode_id, _, timestamp, text, ep_title, best_match, embeddings, _ = result
         # idea: maybe retrieve file path of image from here and send it to frontend
-        image_uuid = map_image(title, episode_id, table)
-        similarity = max(embeddings)
+        image_uuid = map_image(result['title'], result['episodeid'], table)
+        similarity = max(result['similarity'])
         offset = int(offset)
-        results[idx + offset] = {'title': title,
-                                 'episodeId': format_episode_id(episode_id),
-                                 'timestamp': timestamp,
-                                 'text': text,
-                                 'exactMatch': best_match,
-                                 'episodeTitle': ep_title,
+        progress = compute_progress(result['runtime'], result['timestamp'])
+        results[idx + offset] = {'title': result['title'],
+                                 'episodeId': format_episode_id(result['episodeid']),
+                                 'timestamp': result['timestamp'],
+                                 'text': result['plaintext'],
+                                 'exactMatch': result['best_match'],
+                                 'episodeTitle': result['episodetitle'],
                                  'similarity': similarity,
                                  'type': 'conversation',
-                                 'imageId': image_uuid}
+                                 'imageId': image_uuid,
+                                 'relativeProgress': progress}
     return results
 
 
@@ -131,15 +153,14 @@ def description_query(conn, query: np.ndarray | str, show: str = None,
     results_desc = combine_multi_part_query(results_desc, query, 'description')
     results = {}
     for idx, result in enumerate(results_desc):
-        title, episode_id, text, ep_title, best_match, embeddings, _ = result
-        image_uuid = map_image(title, episode_id, table)
-        similarity = max(embeddings)
+        image_uuid = map_image(result['title'], result['episodeid'], table)
+        similarity = max(result['similarity'])
         offset = int(offset)
-        results[idx + ex + offset] = {'title': title,
-                                      'episodeId': format_episode_id(episode_id),
-                                      'text': text,
-                                      'exactMatch': best_match,
-                                      'episodeTitle': ep_title,
+        results[idx + ex + offset] = {'title': result['title'],
+                                      'episodeId': format_episode_id(result['episodeid']),
+                                      'text': result['plaintext'],
+                                      'exactMatch': result['best_match'],
+                                      'episodeTitle': result['episodetitle'],
                                       'similarity': similarity,
                                       'type': 'description',
                                       'imageId': image_uuid}

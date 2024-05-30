@@ -3,6 +3,7 @@ import json
 from django.http import JsonResponse, HttpResponse
 from django.views.decorators.csrf import csrf_exempt
 from backend.retrieve_images import convert_image
+import traceback
 import backend.database_functions as dbf
 import backend.user_query as uq
 import os
@@ -75,6 +76,10 @@ def query_media(request, fts=False):
     if params['table'] == 'TV Shows':
         params['table'] = 'TVShows'
     params['type'] = params['type'].lower()
+    # TEMP CODE REMOVE THIS NEXT COMMIT TODO: remove this
+    if params['query'].startswith("fts:"):
+        params['query'] = params['query'][4:]
+        fts = True
 
     time_format = "%Y-%m-%d %H:%M:%S"
 
@@ -89,8 +94,9 @@ def query_media(request, fts=False):
         print(f"[{time}] Incorrect table: {params['table']} provided")
         return JsonResponse({'error': 'Invalid table provided'}, status=403)
 
+    plain = "plain" if fts else ""
     print(
-        f"[{time}] Finding media with query: '{params['query']}', show: '{params['show']}', "
+        f"[{time}] Finding media with {plain} query: '{params['query']}', show: '{params['show']}', "
         f"table: '{params['table']}', type: '{params['type']}', offset: '{params['offset']}'",
         end=" ")
 
@@ -100,7 +106,7 @@ def query_media(request, fts=False):
         else:
             query_result = uq.query_db(**params)
     except Exception as e:
-        print(e)
+        print(f"\n{traceback.format_exc()}")
         query_result = {'error': 'there was an error fetching the results from the database'}
         return JsonResponse(query_result, status=501)
     print(f"... found {len(query_result)} entries")
