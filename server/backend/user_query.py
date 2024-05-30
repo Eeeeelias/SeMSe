@@ -1,6 +1,7 @@
 # This should handle user queries and return the appropriate response
 import numpy as np
 from backend.retrieve_embeddings import encode_text, compute_cosine_similarity
+from backend.format_subtitles import convert_stamp_to_seconds
 from backend import database_functions as dbf
 from backend.retrieve_images import map_image
 import re
@@ -14,7 +15,16 @@ def format_episode_id(episode_id: str):
 
 
 def compute_progress(runtime, timestamp):
-    return [75, 80]
+    start = timestamp.split(' - ')[0]
+    end = timestamp.split(' - ')[1]
+    start_seconds = convert_stamp_to_seconds(start)
+    end_seconds = convert_stamp_to_seconds(end)
+    runtime_seconds = runtime * 60
+    progress_start = (start_seconds / runtime_seconds) * 100
+    progress_end = (end_seconds / runtime_seconds) * 100
+    # make sure progress_end is always greater than progress_start and within 0-100
+    progress_end = progress_end if progress_start - progress_end > 0 else progress_end + 1
+    return [max(0, int(progress_start)), min(100, int(progress_end))]
 
 
 def combine_parts(query_result, title, episode_id, embedded_query, timestamp=None):
@@ -138,7 +148,7 @@ def subtitle_query(conn, query: np.ndarray | str, show: str = None,
                                  'similarity': similarity,
                                  'type': 'conversation',
                                  'imageId': image_uuid,
-                                 'relativeProgress': progress}
+                                 'progress': progress}
     return results
 
 
@@ -163,5 +173,6 @@ def description_query(conn, query: np.ndarray | str, show: str = None,
                                       'episodeTitle': result['episodetitle'],
                                       'similarity': similarity,
                                       'type': 'description',
-                                      'imageId': image_uuid}
+                                      'imageId': image_uuid,
+                                      'progress': None}
     return results

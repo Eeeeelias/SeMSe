@@ -106,7 +106,7 @@ paths:
         - query
       summary: Query the database in plain text
       description: Query the database for a plain text search
-      operationId: postQuery
+      operationId: postPlainQuery
       requestBody:
         description: Search a query in the database for word matches
         content:
@@ -341,3 +341,9 @@ components:
             type: string
             description: The ID of the associated episode image.
             example: b91d3e54-3dfe-4995-8c8e-6ad6df705b63
+          progress:
+            type: array
+            items:
+              type: integer
+            description: Array indicating the relative progress of where the conversation was found from 0 - 100. null if description
+            example: [2, 10]
