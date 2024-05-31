@@ -138,7 +138,10 @@ def subtitle_query(conn, query: np.ndarray | str, show: str = None,
         image_uuid = map_image(result['title'], result['episodeid'], table)
         similarity = max(result['similarity'])
         offset = int(offset)
-        progress = compute_progress(result['runtime'], result['timestamp'])
+        try:
+            progress = compute_progress(result['runtime'], result['timestamp'])
+        except:
+            progress = None
         results[idx + offset] = {'title': result['title'],
                                  'episodeId': format_episode_id(result['episodeid']),
                                  'timestamp': result['timestamp'],

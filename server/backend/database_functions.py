@@ -206,7 +206,7 @@ def query_description(conn: psycopg2.connect, query: np.ndarray, show: str = Non
             ORDER BY d.Embedding <=> %s
             LIMIT %s OFFSET %s
             )
-    SELECT td.Title, d.EpisodeID, d.PlainText, d.episodetitle, d.Embedding, d.Part
+    SELECT DISTINCT td.Title, d.EpisodeID, d.PlainText, d.episodetitle, d.Embedding, d.Part
     FROM Descriptions AS d
     JOIN TopDescriptions AS td ON d.{id_name} = td.{id_name} AND d.EpisodeID = td.EpisodeID
     """
@@ -241,7 +241,7 @@ def query_subtitle(conn: psycopg2.connect, query: np.ndarray, show: str = None,
             ORDER BY d.Embedding <=> %s
             LIMIT %s OFFSET %s
             )
-    SELECT td.Title, d.EpisodeID, d.Language, d.Timestamp, d.PlainText, d.episodetitle, d.Embedding, d.part, d.Runtime
+    SELECT DISTINCT td.Title, d.EpisodeID, d.Language, d.Timestamp, d.PlainText, d.episodetitle, d.Embedding, d.part, d.Runtime
     FROM Subtitles AS d
     JOIN TopSubtitles AS td ON d.{table_id} = td.{table_id} AND d.timestamp = td.timestamp AND d.EpisodeID = td.EpisodeID
             """
