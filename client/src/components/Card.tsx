@@ -12,17 +12,14 @@ const Root = ({ children }: ChildrenProp) => (
     {children}
   </article>
 )
-const Hero = ({
-  title,
-  subtitle,
-  imageUrl,
-}: {
+interface HeroProps extends ChildrenProp {
   title: string
   subtitle?: string
   imageUrl?: string
-}) => (
+}
+const Hero = ({ title, subtitle, imageUrl, children }: HeroProps) => (
   <div
-    className="text-text-priority h-32 w-full bg-cover"
+    className="text-text-priority relative h-32 w-full bg-cover"
     style={{ backgroundImage: imageUrl ? `url(${imageUrl})` : undefined }}
   >
     <h2 className="grid size-full place-content-center bg-black/60 p-2 text-center">
@@ -32,6 +29,7 @@ const Hero = ({
           {subtitle}
         </span>
       )}
+      {children}
     </h2>
   </div>
 )
