@@ -18,6 +18,21 @@ glob`
   }
 `
 
+const getNoDataMessage = (
+  state: "init" | "idle" | "pending",
+  result: QueryResult | null
+) => {
+  switch (state) {
+    case "init":
+      return "Nothing to see here yet, use the filters to search for some media!"
+    case "idle":
+      if (!result || result.length === 0) {
+        return "No results found."
+      }
+  }
+  return null
+}
+
 export const App = () => {
   const [state, setState] = useState<"init" | "pending" | "idle">("init")
   const [results, setResults] = useState<QueryResult | null>(null)
@@ -42,6 +57,8 @@ export const App = () => {
       .finally(() => setState("idle"))
   }
 
+  const noData = getNoDataMessage(state, results)
+
   return (
     <div className="m-auto max-w-[100vw] px-4">
       <div className="py-20 text-center">
@@ -58,25 +75,23 @@ export const App = () => {
       <SizeKpis />
       <SearchInputs onSubmit={sendQuery} />
 
-      {state === "init" && (
-        <div className="m-auto mb-10 mt-20 w-max">
-          <NoData label="Nothing to see here yet, use the filters to search for some media!" />
-        </div>
-      )}
-
       {state === "pending" && (
         <div className="m-auto my-10 size-60">
           <Loading size="lg" />
         </div>
       )}
 
-      {results ? (
+      {noData && (
+        <div className="m-auto mb-10 mt-20 w-max">
+          <NoData label={noData} />
+        </div>
+      )}
+
+      {results && !noData && (
         <div className="m-auto my-10 max-w-6xl">
           <SearchResult results={results} />
         </div>
-      ) : state === "idle" ? (
-        <NoData label="No results found" />
-      ) : null}
+      )}
     </div>
   )
 }
