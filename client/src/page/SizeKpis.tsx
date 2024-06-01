@@ -76,7 +76,7 @@ const labels: Record<string, string> = {
   animes: "Animes",
   movies: "Movies",
   descriptions: "Descriptions",
-  subtitles: "Subtitles",
+  subtitles: "Conversations",
 }
 
 const getKpis = (size: Record<string, number>) =>

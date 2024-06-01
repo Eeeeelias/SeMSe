@@ -168,7 +168,7 @@ const inputs: Record<string, InputConfig> = {
     component: QueryInput,
   },
   table: {
-    label: "Table",
+    label: "Category",
     value: "table",
     required: true,
     component: TableInput,
