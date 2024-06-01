@@ -1,4 +1,9 @@
-import { useAtomValue } from "@yaasl/preact"
+import {
+  createAtom,
+  expiration,
+  localStorage,
+  useAtomValue,
+} from "@yaasl/preact"
 import { Dispatch, useEffect, useRef, useState } from "preact/hooks"
 
 import { sizeAtom } from "~/data/size"
@@ -17,17 +22,33 @@ const getSteps = (value: number) =>
 
 const numberToText = (value: number) => Math.floor(value).toLocaleString()
 
+const tomorrwow = () => {
+  const date = new Date()
+  date.setDate(date.getDate() + 1)
+  date.setHours(0, 0, 0, 0)
+  return date
+}
+const didCount = createAtom({
+  defaultValue: false,
+  effects: [localStorage(), expiration({ expiresAt: () => tomorrwow() })],
+})
+
 const countUp = (
   element: HTMLElement,
   value: number,
   onEnd: Dispatch<string>
 ) => {
+  if (didCount.get()) {
+    onEnd(numberToText(value))
+    return () => null
+  }
   let count = 0
   const { step, intervalMs } = getSteps(value)
 
   const interval = setInterval(() => {
     if (count >= value) {
       element.textContent = ""
+      didCount.set(true)
       onEnd(numberToText(count))
       clearInterval(interval)
       return
