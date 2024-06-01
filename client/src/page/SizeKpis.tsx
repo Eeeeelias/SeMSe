@@ -62,11 +62,20 @@ interface KpiProps {
 const NumberKpi = ({ label, value }: KpiProps) => {
   const { ref, count } = useCountUp(value)
   return (
-    <div className={cn("flex flex-col items-start justify-center")}>
-      <span ref={ref} className="font-mono text-xl">
+    <div
+      className={cn("flex min-w-20 flex-col items-start justify-center gap-1")}
+    >
+      <span
+        ref={ref}
+        style={{ lineHeight: "1" }}
+        className={cn(
+          "border-text-gentle/75 inline-flex justify-center font-mono text-xl font-bold",
+          "before:bg-text-gentle/75 before:mr-2 before:inline-block before:h-full before:w-1 before:rounded-full"
+        )}
+      >
         {count}
       </span>
-      <span className="text-text/75 text-sm font-bold">{label}</span>
+      <span className="text-text-gentle/75 text-sm font-bold">{label}</span>
     </div>
   )
 }
@@ -89,11 +98,7 @@ export const SizeKpis = () => {
   const size = useAtomValue(sizeAtom)
 
   return !size ? null : (
-    <div
-      className={cn(
-        "m-4 mx-auto flex max-w-3xl flex-wrap justify-center gap-10 bg-transparent px-4 py-2"
-      )}
-    >
+    <div className={cn("flex flex-wrap justify-center gap-10")}>
       {getKpis(size).map(kpi => (
         <NumberKpi key={kpi.id} {...kpi} />
       ))}
