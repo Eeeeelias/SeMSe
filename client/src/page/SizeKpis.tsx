@@ -3,7 +3,6 @@ import { Dispatch, useEffect, useRef, useState } from "preact/hooks"
 
 import { sizeAtom } from "~/data/size"
 import { cn } from "~/utils/cn"
-import { surface } from "~/utils/styles"
 
 const getSteps = (value: number) =>
   value < 250
@@ -54,19 +53,37 @@ const useCountUp = (value: number) => {
   return { ref, count }
 }
 
-interface NumberKpiProps {
-  title: string
+interface KpiProps {
+  id: string
+  label: string
   value: number
 }
-const NumberKpi = ({ title, value }: NumberKpiProps) => {
+
+const NumberKpi = ({ label, value }: KpiProps) => {
   const { ref, count } = useCountUp(value)
   return (
-    <div className={cn("flex flex-col items-center")}>
-      <b ref={ref}>{count}</b>
-      <span>{title}</span>
+    <div className={cn("flex flex-col items-start justify-center")}>
+      <span ref={ref} className="font-mono text-xl">
+        {count}
+      </span>
+      <span className="text-text/75 text-sm font-bold">{label}</span>
     </div>
   )
 }
+
+const labels: Record<string, string> = {
+  tv_shows: "TV Shows",
+  animes: "Animes",
+  movies: "Movies",
+  descriptions: "Descriptions",
+  subtitles: "Subtitles",
+}
+
+const getKpis = (size: Record<string, number>) =>
+  Object.entries(size).reduce<KpiProps[]>(
+    (acc, [key, value]) => [...acc, { id: key, value, label: labels[key] }],
+    []
+  )
 
 export const SizeKpis = () => {
   const size = useAtomValue(sizeAtom)
@@ -74,12 +91,11 @@ export const SizeKpis = () => {
   return !size ? null : (
     <div
       className={cn(
-        surface(),
-        "m-4 mx-auto flex w-max flex-wrap justify-center gap-4 px-4 py-2"
+        "m-4 mx-auto flex max-w-3xl flex-wrap justify-center gap-10 bg-transparent px-4 py-2"
       )}
     >
-      {Object.entries(size).map(([key, value]) => (
-        <NumberKpi key={key} title={key} value={value} />
+      {getKpis(size).map(kpi => (
+        <NumberKpi key={kpi.id} {...kpi} />
       ))}
     </div>
   )
