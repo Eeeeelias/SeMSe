@@ -3,8 +3,6 @@
 @tailwind utilities;
 
 @layer base {
-  @import url("/fonts/quicksand.css");
-  
   :root {
     @apply bg-background-page;
     @apply text-text;

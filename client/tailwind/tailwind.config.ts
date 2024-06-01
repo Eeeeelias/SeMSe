@@ -13,6 +13,7 @@ export default {
     fontFamily: {
       sans: ["Quicksand", ...fontFamily.sans],
       body: ["Quicksand", ...fontFamily.sans],
+      mono: ["Fira Code", ...fontFamily.mono],
     },
     colors,
 
