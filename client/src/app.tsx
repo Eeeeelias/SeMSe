@@ -3,7 +3,7 @@ import { useState } from "preact/hooks"
 
 import { Loading } from "./components/Loading"
 import { NoData } from "./components/NoData"
-import { toast } from "./components/Toaster"
+import { showToast } from "./components/Toaster"
 import { PostQueryData, QueryResult, postQuery } from "./generated-api"
 import { FiltersState, SearchInputs } from "./page/SearchInputs"
 import { SearchResult } from "./page/SearchResult"
@@ -48,7 +48,7 @@ export const App = () => {
     postQuery({ requestBody })
       .then(setResults)
       .catch(error => {
-        toast({
+        showToast({
           kind: "error",
           title: "Error occured!",
           message: String(error),

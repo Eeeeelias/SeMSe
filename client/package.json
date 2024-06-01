@@ -14,8 +14,8 @@
   },
   "dependencies": {
     "@floating-ui/react": "^0.26.16",
-    "@yaasl/devtools": "^0.9.2",
-    "@yaasl/preact": "^0.9.2",
+    "@yaasl/devtools": "^0.10.0-alpha.0",
+    "@yaasl/preact": "^0.10.0-alpha.0",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.1",
     "goober": "^2.1.14",

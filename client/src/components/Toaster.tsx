@@ -1,4 +1,4 @@
-import { createAtom, useAtomValue } from "@yaasl/preact"
+import { createSlice, useAtomValue } from "@yaasl/preact"
 import { keyframes } from "goober"
 
 import { cn } from "~/utils/cn"
@@ -17,37 +17,32 @@ const kinds = {
 } as const
 
 interface ToastProps {
+  id: string
   kind: "info" | "success" | "warn" | "error"
   title: string
   message?: string
   duration?: number
 }
 
-interface ToastState extends ToastProps {
-  id: string
-}
-
-const toastsAtom = createAtom<ToastState[]>({
-  name: "toasts",
-  defaultValue: [],
+const toastList = createSlice({
+  name: "toast-list",
+  defaultValue: [] as ToastProps[],
+  reducers: {
+    add: (state, toast: ToastProps) => [...state, toast],
+    close: (state, id: string) => state.filter(toast => toast.id !== id),
+  },
 })
 
-const removeToast = (id: string) => {
-  toastsAtom.set(toasts => toasts.filter(toast => toast.id !== id))
-}
-
-export const toast = ({
+export const showToast = ({
   kind,
   duration = kinds[kind].duration,
   ...props
-}: ToastProps) => {
+}: Omit<ToastProps, "id">) => {
   const id = createId()
-  toastsAtom.set(toasts => [...toasts, { id, kind, duration, ...props }])
-
-  if (duration < 1) return
-  setTimeout(() => {
-    removeToast(id)
-  }, duration)
+  toastList.actions.add({ ...props, kind, duration, id })
+  if (duration) {
+    setTimeout(() => toastList.actions.close(id), duration)
+  }
 }
 
 const shrink = keyframes`
@@ -63,15 +58,15 @@ const shrink = keyframes`
   }
 `
 
-const Toast = ({ id, kind, title, message, duration }: ToastState) => {
+const Toast = ({ id, kind, title, message, duration }: ToastProps) => {
   const { icon } = kinds[kind]
 
   return (
     <div
       className={cn(
         "relative flex w-72 p-1",
-        surface({ rounded: "md", shade: "low" }),
-        "bg-black/15",
+        surface({ rounded: "md", shade: "low", bg: "dark" }),
+        "bgl-base-b/50 backdrop-blur-md",
         {
           error: "border-alert-error/25",
           warn: "border-alert-warn/25",
@@ -89,7 +84,11 @@ const Toast = ({ id, kind, title, message, duration }: ToastState) => {
           <div className="text-text mt-1 line-clamp-3 text-sm">{message}</div>
         )}
       </div>
-      <Button kind="flat" size="icon" onClick={() => removeToast(id)}>
+      <Button
+        kind="flat"
+        size="icon"
+        onClick={() => toastList.actions.close(id)}
+      >
         <Icon icon="xmark" />
       </Button>
       <span
@@ -111,7 +110,7 @@ const Toast = ({ id, kind, title, message, duration }: ToastState) => {
 }
 
 export const Toaster = () => {
-  const toasts = useAtomValue(toastsAtom)
+  const toasts = useAtomValue(toastList)
 
   return (
     <Portal>
