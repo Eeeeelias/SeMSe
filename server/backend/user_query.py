@@ -138,9 +138,9 @@ def subtitle_query(conn, query: np.ndarray | str, show: str = None,
         image_uuid = map_image(result['title'], result['episodeid'], table)
         similarity = max(result['similarity'])
         offset = int(offset)
-        try:
+        if result['runtime']:
             progress = compute_progress(result['runtime'], result['timestamp'])
-        except:
+        else:
             progress = None
         results[idx + offset] = {'title': result['title'],
                                  'episodeId': format_episode_id(result['episodeid']),
@@ -163,6 +163,7 @@ def description_query(conn, query: np.ndarray | str, show: str = None,
     else:
         results_desc = dbf.query_description(conn, query, show, table, limit, offset, season)
 
+    print(results_desc)
     results_desc = combine_multi_part_query(results_desc, query, 'description')
     results = {}
     for idx, result in enumerate(results_desc):

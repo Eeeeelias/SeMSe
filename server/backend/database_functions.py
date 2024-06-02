@@ -206,7 +206,7 @@ def query_description(conn: psycopg2.connect, query: np.ndarray, show: str = Non
             ORDER BY d.Embedding <=> %s
             LIMIT %s OFFSET %s
             )
-    SELECT DISTINCT td.Title, d.EpisodeID, d.PlainText, d.episodetitle, d.Embedding, d.Part
+    SELECT td.Title, d.EpisodeID, d.PlainText, d.episodetitle, d.Embedding, d.Part
     FROM Descriptions AS d
     JOIN TopDescriptions AS td ON d.{id_name} = td.{id_name} AND d.EpisodeID = td.EpisodeID
     """
@@ -214,7 +214,12 @@ def query_description(conn: psycopg2.connect, query: np.ndarray, show: str = Non
     params = [x for x in [show, season, str_embedding, limit, offset] if x not in [None, ""]]
 
     with conn.cursor(cursor_factory=DictCursor) as cursor:
-        cursor.execute(sql_string, params)
+        try:
+            cursor.execute(sql_string, params)
+        except:
+            conn.rollback()
+            print("Error, rolled back: query_description")
+            return []
         return cursor.fetchall()
 
 
@@ -241,7 +246,7 @@ def query_subtitle(conn: psycopg2.connect, query: np.ndarray, show: str = None,
             ORDER BY d.Embedding <=> %s
             LIMIT %s OFFSET %s
             )
-    SELECT DISTINCT td.Title, d.EpisodeID, d.Language, d.Timestamp, d.PlainText, d.episodetitle, d.Embedding, d.part, d.Runtime
+    SELECT td.Title, d.EpisodeID, d.Language, d.Timestamp, d.PlainText, d.episodetitle, d.Embedding, d.part, d.Runtime
     FROM Subtitles AS d
     JOIN TopSubtitles AS td ON d.{table_id} = td.{table_id} AND d.timestamp = td.timestamp AND d.EpisodeID = td.EpisodeID
             """
@@ -250,7 +255,12 @@ def query_subtitle(conn: psycopg2.connect, query: np.ndarray, show: str = None,
     params = [x for x in [show, language, season, str_embedding, limit, offset] if x not in [None, ""]]
     try:
         with conn.cursor(cursor_factory=DictCursor) as cursor:
-            cursor.execute(sql_string, params)
+            try:
+                cursor.execute(sql_string, params)
+            except:
+                conn.rollback()
+                print("Error, rolled back in query_subtitle")
+                return []
             return cursor.fetchall()
     except Exception as e:
         print(e)
@@ -284,7 +294,12 @@ def query_description_fts(conn: psycopg2.connect, query: str, show: str = None, 
 
     try:
         with conn.cursor(cursor_factory=DictCursor) as cursor:
-            cursor.execute(sql_string, params)
+            try:
+                cursor.execute(sql_string, params)
+            except:
+                conn.rollback()
+                print("Error, rolled back in query_description_fts")
+                return []
             return cursor.fetchall()
     except Exception as e:
         print(e)
@@ -320,7 +335,12 @@ def query_subtitle_fts(conn: psycopg2.connect, query: str, show: str = None,
 
     try:
         with conn.cursor(cursor_factory=DictCursor) as cursor:
-            cursor.execute(sql_string, params)
+            try:
+                cursor.execute(sql_string, params)
+            except:
+                conn.rollback()
+                print("Error, rolled back in query_subtitle_fts")
+                return []
             return cursor.fetchall()
     except Exception as e:
         print(e)

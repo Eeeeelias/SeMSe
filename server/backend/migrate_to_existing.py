@@ -106,6 +106,6 @@ def populate_runtime_column():
 
 
 if __name__ == '__main__':
-    # add_runtime_column()
+    add_runtime_column()
     populate_new_column(tag="runtime", column="runtime", tables=("subtitles",))
     conn.close()
