@@ -1,4 +1,9 @@
+import { useState } from "preact/hooks"
+
+import { Icon } from "~/components/base/Icon"
+import { Button } from "~/components/Button"
 import { Card } from "~/components/Card"
+import { Modal } from "~/components/Modal"
 import { RangeMeter } from "~/components/RangeMeter"
 import { OpenAPI, QueryResult } from "~/generated-api"
 
@@ -14,6 +19,7 @@ const formatTimeStamp = (timestamp: string) => {
 }
 
 const MatchCard = ({
+  onOpen,
   title,
   episodeId,
   episodeTitle,
@@ -23,10 +29,14 @@ const MatchCard = ({
   text,
   timestamp,
   type,
-}: QueryResult[number]) => {
+}: QueryResult[number] & { onOpen: () => void }) => {
   const [timeStart, timeEnd] = progress ?? [undefined, undefined]
   return (
-    <Card.Root>
+    <Card.Root className="relative">
+      <Button onClick={onOpen} className="absolute right-1 top-1 z-10">
+        <Icon icon="info" />
+      </Button>
+
       <Card.Hero
         title={title ?? ""}
         subtitle={[episodeId, episodeTitle].filter(Boolean).join(" - ")}
@@ -52,14 +62,57 @@ const MatchCard = ({
   )
 }
 
+const InfoModal = ({
+  episodeId,
+  episodeTitle,
+  imageId,
+  title,
+  text,
+}: QueryResult[number]) => {
+  const imageUrl = getImage(imageId)
+  return (
+    <>
+      <div
+        className="text-text-priority relative h-32 w-full overflow-hidden rounded-t-lg bg-cover"
+        style={{
+          backgroundImage: imageUrl ? `url(${imageUrl})` : undefined,
+        }}
+      >
+        <h2 className="grid size-full place-content-center bg-black/60 p-2 text-center">
+          <span className="truncate text-lg font-bold">{title}</span>
+          <span className="text-text-highlight line-clamp-2 text-sm font-bold">
+            {[episodeId, episodeTitle].filter(Boolean).join(" - ")}
+          </span>
+        </h2>
+      </div>
+      <div className="p-4">{text}</div>
+    </>
+  )
+}
+
 interface SearchResultProps {
   results: QueryResult
 }
 
-export const SearchResult = ({ results }: SearchResultProps) => (
-  <div className="grid grid-cols-[repeat(auto-fit,minmax(theme(width.60),1fr))] justify-center gap-4">
-    {results.map(result => (
-      <MatchCard key={getId(result)} {...result} />
-    ))}
-  </div>
-)
+export const SearchResult = ({ results }: SearchResultProps) => {
+  const [selected, setSelected] = useState<QueryResult[number] | null>(null)
+  return (
+    <>
+      <div className="grid grid-cols-[repeat(auto-fit,minmax(theme(width.60),1fr))] justify-center gap-4">
+        {results.map(result => (
+          <MatchCard
+            key={getId(result)}
+            {...result}
+            onOpen={() => setSelected(result)}
+          />
+        ))}
+      </div>
+
+      {selected && (
+        <Modal.Root onClose={() => setSelected(null)} className="w-96">
+          <InfoModal {...selected} />
+        </Modal.Root>
+      )}
+    </>
+  )
+}

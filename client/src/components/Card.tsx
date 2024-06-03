@@ -1,12 +1,13 @@
-import { ChildrenProp } from "~/components/base/BaseProps"
+import { ChildrenProp, ClassNameProp } from "~/components/base/BaseProps"
 import { cn } from "~/utils/cn"
 import { surface } from "~/utils/styles"
 
-const Root = ({ children }: ChildrenProp) => (
+const Root = ({ className, children }: ChildrenProp & ClassNameProp) => (
   <article
     className={cn(
       surface({ shade: "medium" }),
-      "flex flex-col overflow-hidden"
+      "flex flex-col overflow-hidden",
+      className
     )}
   >
     {children}
