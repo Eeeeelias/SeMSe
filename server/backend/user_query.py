@@ -76,6 +76,7 @@ def combine_multi_part_query(query_result: list, embedded_query, type=None) -> l
             elif q['part'] == 0:
                 combined_text, best_match, similarities = combine_parts(query_result, q['title'], q['episodeid'],
                                                                         embedded_query, q['timestamp'])
+                q['plaintext'] = combined_text
                 combined.append({**q, 'similarity': similarities, 'best_match': best_match})
 
             c += 1
@@ -94,6 +95,7 @@ def combine_multi_part_query(query_result: list, embedded_query, type=None) -> l
             else:
                 combined_text, best_match, similarities = combine_parts(query_result, q['title'],
                                                                         q['episodeid'], embedded_query)
+                q['plaintext'] = combined_text
                 combined.append({**q, 'similarity': similarities, 'best_match': best_match})
 
             c += 1
@@ -163,7 +165,6 @@ def description_query(conn, query: np.ndarray | str, show: str = None,
     else:
         results_desc = dbf.query_description(conn, query, show, table, limit, offset, season)
 
-    print(results_desc)
     results_desc = combine_multi_part_query(results_desc, query, 'description')
     results = {}
     for idx, result in enumerate(results_desc):
