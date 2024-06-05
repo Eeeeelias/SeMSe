@@ -82,7 +82,6 @@ def combine_multi_part_query(query_result: list, embedded_query, type=None) -> l
             c += 1
 
     elif type == 'description':
-        #                     title, episode_id, text, ep_title, best_match, embeddings, _ = result
 
         for q in query_result:
             if q['part'] is None:
@@ -99,6 +98,7 @@ def combine_multi_part_query(query_result: list, embedded_query, type=None) -> l
                 combined.append({**q, 'similarity': similarities, 'best_match': best_match})
 
             c += 1
+
     return combined
 
 

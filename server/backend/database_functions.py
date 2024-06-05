@@ -67,9 +67,9 @@ def create_tables(conn):
             TVShowID INT,
             AnimeID INT,
             MovieID INT,
-            FOREIGN KEY (TVShowID) REFERENCES TVShows(TVShowID),
-            FOREIGN KEY (AnimeID) REFERENCES Animes(AnimeID),
-            FOREIGN KEY (MovieID) REFERENCES Movies(MovieID)
+            FOREIGN KEY (TVShowID) REFERENCES TVShows(TVShowID) ON DELETE CASCADE,
+            FOREIGN KEY (AnimeID) REFERENCES Animes(AnimeID) ON DELETE CASCADE,
+            FOREIGN KEY (MovieID) REFERENCES Movies(MovieID) ON DELETE CASCADE
             );
 
             CREATE TABLE IF NOT EXISTS Subtitles (
@@ -85,9 +85,9 @@ def create_tables(conn):
             AnimeID INT,
             MovieID INT,
             Runtime INT,
-            FOREIGN KEY (TVShowID) REFERENCES TVShows(TVShowID),
-            FOREIGN KEY (AnimeID) REFERENCES Animes(AnimeID),
-            FOREIGN KEY (MovieID) REFERENCES Movies(MovieID)
+            FOREIGN KEY (TVShowID) REFERENCES TVShows(TVShowID) ON DELETE CASCADE,
+            FOREIGN KEY (AnimeID) REFERENCES Animes(AnimeID) ON DELETE CASCADE,
+            FOREIGN KEY (MovieID) REFERENCES Movies(MovieID) ON DELETE CASCADE
             );
             
             CREATE TABLE IF NOT EXISTS ImageMappings (
