@@ -56,7 +56,7 @@ def subtitle_information(input_file):
 
     # extract subtitle information from video file using ffprobe
     # support text based subtitles only
-    supported_subtitle_codecs = ['ass', 'srt', 'hdmv_pgs_subtitle', 'subrip']
+    supported_subtitle_codecs = ['ass', 'srt', 'hdmv_pgs_subtitle', 'mov_text', 'subrip']
     excluded_titles = ['Signs & Songs', 'Signs/Songs', 'Forced']
 
     command = f"ffprobe -hide_banner -loglevel panic -print_format json -show_streams -select_streams s \"{input_file}\""
