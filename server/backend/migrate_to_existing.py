@@ -2,6 +2,8 @@
 import os.path
 import tqdm
 import psycopg2
+from psycopg2.extras import DictCursor
+
 
 # change the connection string to match your db
 conn = psycopg2.connect("dbname=postgres user=postgres password=secret host=192.168.192.2 port=5432")
@@ -35,9 +37,19 @@ def get_file_path(table_name, title, episode_id):
     base_path = "/mnt/MediaFiles/MediaFiles/"
     if table_name == "animes":
         base_path += "Anime/"
-    else:
+    elif table_name == "tvshows":
         base_path += "TV Shows/"
+    else:
+        base_path += "Movies/"
     show_name = title
+
+    # take care of movies here
+    if table_name == "movies":
+        for file in os.listdir(base_path + show_name):
+            if file.find(title) != -1 and any([x in file for x in [".mkv", ".mp4", ".avi"]]):
+                return base_path + show_name + "/" + file
+        return
+
     season = int(episode_id.upper().split("E")[0].split("S")[1])
     season_name = f"Season {season}"
     if not os.path.isdir(base_path + show_name + "/" + season_name):
@@ -69,17 +81,36 @@ def get_tag(file_path, tag="title"):
 
 
 def populate_new_column(tag="title", column="episodeTitle", tables=("descriptions", "subtitles")):
-    cur = conn.cursor()
-    cur.execute("SELECT episodeid, animeid, tvshowid FROM descriptions")
+    cur = conn.cursor(cursor_factory=DictCursor)
+    cur.execute("SELECT DISTINCT episodeid, movieid, animeid, tvshowid FROM subtitles")
     rows = cur.fetchall()
+    cur.execute(f"SELECT DISTINCT {column}, episodeid, movieid, animeid, tvshowid FROM subtitles")
+    existing_rows = cur.fetchall()
+    print("Found ", len(existing_rows), " existing rows.")
     for row in tqdm.tqdm(rows, desc=f"Populating {tag}s", unit="episodes"):
-        if not row[1] and not row[2]:
+        if not any([row[1], row[2], row[3]]):
             continue
-        table_name = "animes" if row[1] else "tvshows"
-        id_type = "anime" if row[1] else "tvshow"
-        id_value = row[1] if row[1] else row[2]
-        show_title = fetch_titles(table_name, row[1] if row[1] else row[2])[0]
-        file_path = get_file_path(table_name, show_title, row[0])
+
+        if row['animeid']:
+            table_name = "animes"
+            id_type = "anime"
+            id_value = row['animeid']
+        elif row['tvshowid']:
+            table_name = "tvshows"
+            id_type = "tvshow"
+            id_value = row['tvshowid']
+        else:
+            table_name = "movies"
+            id_type = "movie"
+            id_value = row['movieid']
+
+        # check if the episodeid + id_value already have a value in the column
+        if any([x['episodeid'] == row['episodeid'] and x['movieid'] == row['movieid'] and x['animeid'] == row['animeid']
+                and x['tvshowid'] == row['tvshowid'] and x[column] for x in existing_rows]):
+            continue
+
+        show_title = fetch_titles(table_name, id_value)[0]
+        file_path = get_file_path(table_name, show_title, row['episodeid'])
 
         if not file_path:
             continue
@@ -90,9 +121,11 @@ def populate_new_column(tag="title", column="episodeTitle", tables=("description
         if "descriptions" in tables:
             sql = f"UPDATE descriptions SET {column} = %s WHERE episodeid = %s AND {id_type}id = %s"
             cur.execute(sql, (title, row[0], id_value))
-        if "subtitles" in tables:
+        elif "subtitles" in tables:
             sql_sub = f"UPDATE subtitles SET {column} = %s WHERE episodeid = %s AND {id_type}id = %s"
             cur.execute(sql_sub, (title, row[0], id_value))
+        else:
+            print("No table to update")
     conn.commit()
 
 
@@ -106,6 +139,6 @@ def populate_runtime_column():
 
 
 if __name__ == '__main__':
-    add_runtime_column()
+    # add_runtime_column()
     populate_new_column(tag="runtime", column="runtime", tables=("subtitles",))
     conn.close()
