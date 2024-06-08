@@ -1,7 +1,7 @@
-import { useAtomValue } from "@yaasl/preact"
 import { forwardRef } from "preact/compat"
 
 import { breakpoint } from "~/data/breakpoint"
+import { useAtomValue } from "~/data/yaasl"
 import { cn } from "~/utils/cn"
 
 import { Decorator, AlertProps, Action } from "./Decorator"

@@ -1,12 +1,9 @@
-import { reduxDevtools } from "@yaasl/devtools"
 import {
   createAtom,
   localStorage,
   expiration,
   createEffect,
-} from "@yaasl/preact"
-
-import { loadConfig } from "./loadConfig"
+} from "~/data/yaasl"
 
 const DAY = 24 * 60 * 60 * 1000
 
@@ -27,20 +24,9 @@ interface FetchAtomProps<T> {
   dispatch: () => Promise<T>
   persist?: boolean
 }
-export const fetchAtom = <T>({
-  name,
-  dispatch,
-  persist,
-}: FetchAtomProps<T>) => {
-  loadConfig()
-
-  return createAtom<T | null>({
+export const fetchAtom = <T>({ name, dispatch, persist }: FetchAtomProps<T>) =>
+  createAtom<T | null>({
     name,
     defaultValue: null,
-    effects: [
-      ...(persist ? persistance() : []),
-      loadValue({ dispatch }),
-      reduxDevtools({ disable: !import.meta.env.DEV }),
-    ],
+    effects: [...(persist ? persistance() : []), loadValue({ dispatch })],
   })
-}

@@ -1,6 +1,6 @@
-import { createSlice, useAtomValue } from "@yaasl/preact"
 import { keyframes } from "goober"
 
+import { createSlice, useAtomValue } from "~/data/yaasl"
 import { cn } from "~/utils/cn"
 import { createId } from "~/utils/createId"
 import { surface } from "~/utils/styles"

@@ -1,4 +1,4 @@
-import { createAtom } from "@yaasl/preact"
+import { createAtom } from "~/data/yaasl"
 
 const BREAKPOINTS = {
   mobile: 550,

@@ -1,8 +1,8 @@
-import { useAtomValue } from "@yaasl/preact"
 import { forwardRef } from "preact/compat"
 import { Dispatch, useMemo, useState } from "preact/hooks"
 
 import { breakpoint } from "~/data/breakpoint"
+import { useAtomValue } from "~/data/yaasl"
 import { cn } from "~/utils/cn"
 import { meassureText } from "~/utils/meassureText"
 import { useMergeRefs } from "~/utils/mergeRefs"

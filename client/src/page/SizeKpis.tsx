@@ -1,12 +1,12 @@
+import { Dispatch, useEffect, useRef, useState } from "preact/hooks"
+
+import { sizeAtom } from "~/data/size"
 import {
   createAtom,
   expiration,
   localStorage,
   useAtomValue,
-} from "@yaasl/preact"
-import { Dispatch, useEffect, useRef, useState } from "preact/hooks"
-
-import { sizeAtom } from "~/data/size"
+} from "~/data/yaasl"
 import { cn } from "~/utils/cn"
 
 const getSteps = (value: number) =>
@@ -22,15 +22,17 @@ const getSteps = (value: number) =>
 
 const numberToText = (value: number) => Math.floor(value).toLocaleString()
 
-const tomorrwow = () => {
+const tomorrow = () => {
   const date = new Date()
   date.setDate(date.getDate() + 1)
   date.setHours(0, 0, 0, 0)
   return date
 }
+
 const didCount = createAtom({
+  name: "didCount",
   defaultValue: false,
-  effects: [localStorage(), expiration({ expiresAt: () => tomorrwow() })],
+  effects: [localStorage(), expiration({ expiresAt: () => tomorrow() })],
 })
 
 const countUp = (
