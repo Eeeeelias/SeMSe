@@ -27,6 +27,16 @@ def compute_progress(runtime, timestamp):
     return [max(0, int(progress_start)), min(100, int(progress_end))]
 
 
+def filter_duplicates(query_result):
+    seen = set()
+    filtered = []
+    for result in query_result:
+        if f"{result.get('title')}{result.get('episodeId')}{result.get('timestamp', None)}" not in seen:
+            seen.add(f"{result.get('title')}{result.get('episodeId')}{result.get('timestamp', None)}")
+            filtered.append(result)
+    return filtered
+
+
 def combine_parts(query_result, title, episode_id, embedded_query, timestamp=None):
     query_result.sort(key=lambda x: x['part'] if x['part'] is not None else 0)
 
@@ -121,8 +131,12 @@ def query_db(query: str, show: str = None, table: str = None,
         results_desc = description_query(*general_data, len(results_sub), limit=5, offset=offset, season=season)
         results = {**results_desc, **results_sub}
 
+    # filter out duplicates
+    results = filter_duplicates([v for v in results.values()])
+    # results = [v for v in results.values()]
+
     # sort results by similarity
-    return [v for v in sorted(results.values(), key=lambda x: x['similarity'], reverse=True)]
+    return [v for v in sorted(results, key=lambda x: x['similarity'], reverse=True)]
 
 
 def subtitle_query(conn, query: np.ndarray | str, show: str = None,
