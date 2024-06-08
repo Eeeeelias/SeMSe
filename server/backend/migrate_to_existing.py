@@ -68,8 +68,10 @@ def get_file_path(table_name, title, episode_id):
 def get_tag(file_path, tag="title"):
     info_file = file_path[:-4] + ".nfo"
     if not os.path.isfile(info_file):
-        print("Info file not found for ", file_path)
-        return
+        info_file = "/".join(info_file.split("/")[:-1]) + "/movie.nfo"
+        if not os.path.isfile(info_file):
+            print("Info file not found for ", file_path)
+            return
     with open(info_file, 'r') as file:
         data = file.read()
     try:
@@ -106,7 +108,7 @@ def populate_new_column(tag="title", column="episodeTitle", tables=("description
 
         # check if the episodeid + id_value already have a value in the column
         if any([x['episodeid'] == row['episodeid'] and x['movieid'] == row['movieid'] and x['animeid'] == row['animeid']
-                and x['tvshowid'] == row['tvshowid'] and x[column] for x in existing_rows]):
+                and x['tvshowid'] == row['tvshowid'] and isinstance(x[column], int) and x[column] > 0 for x in existing_rows]):
             continue
 
         show_title = fetch_titles(table_name, id_value)[0]
