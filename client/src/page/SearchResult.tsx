@@ -102,7 +102,7 @@ const InfoModal = ({
           </span>
         </h2>
       </div>
-      <div className="p-4">
+      <div className="max-h-96 overflow-auto p-4">
         <Description exactMatch={exactMatch} text={text} />
       </div>
     </>
