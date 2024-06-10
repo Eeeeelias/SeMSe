@@ -62,12 +62,29 @@ const MatchCard = ({
   )
 }
 
+const Description = ({
+  exactMatch,
+  text = "",
+}: Pick<QueryResult[number], "exactMatch" | "text">) => {
+  const [trailing, leading] = !exactMatch ? [text] : text.split(exactMatch)
+  if (!leading || !exactMatch) return <>{text}</>
+
+  return (
+    <>
+      <span className="text-text-gentle">{trailing}</span>
+      <span className="text-text-highlight">{exactMatch}</span>
+      <span className="text-text-gentle">{leading}</span>
+    </>
+  )
+}
+
 const InfoModal = ({
   episodeId,
   episodeTitle,
   imageId,
   title,
   text,
+  exactMatch,
 }: QueryResult[number]) => {
   const imageUrl = getImage(imageId)
   return (
@@ -85,7 +102,9 @@ const InfoModal = ({
           </span>
         </h2>
       </div>
-      <div className="p-4">{text}</div>
+      <div className="p-4">
+        <Description exactMatch={exactMatch} text={text} />
+      </div>
     </>
   )
 }
