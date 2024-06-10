@@ -45,7 +45,7 @@ def subtitle_information(input_file):
         if len(language) == 2 or len(language) == 3:
             try:
                 language = iso639.to_name(language)
-            except KeyError:
+            except (KeyError, iso639.NonExistentLanguageError):
                 print(f"Found unknown language code {language}, skipping subtitle stream.")
                 language = "unknown"
         else:
