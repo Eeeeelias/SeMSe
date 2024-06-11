@@ -1,5 +1,6 @@
 import { useAtomValue } from "@yaasl/preact"
 
+import { Image } from "~/components/Image"
 import { Modal } from "~/components/Modal"
 import { RangeMeter } from "~/components/RangeMeter"
 import { breakpoint } from "~/data/breakpoint"
@@ -45,29 +46,31 @@ const MatchDetails = ({
 
 const ModalImage = ({ imageId }: Pick<QueryResult[number], "imageId">) => {
   const imageUrl = getImageUrl(imageId)
-  const backgroundImage = imageUrl ? `url(${imageUrl})` : undefined
-
   const { isMobile } = useAtomValue(breakpoint)
 
   return !isMobile ? (
-    <div
-      className="h-32 w-60 shrink-0 rounded-br-lg rounded-tl-lg bg-cover"
-      style={{ backgroundImage }}
+    <Image
+      src={imageUrl}
+      fallback="./fallback.svg"
+      className="h-32 w-60 shrink-0 rounded-br-lg rounded-tl-lg"
     />
   ) : (
     <div className="relative flex h-32 w-full overflow-hidden rounded-t-lg">
-      <div
-        className="h-full flex-1 bg-cover blur-md"
-        style={{ backgroundImage }}
+      <Image
+        src={imageUrl}
+        fallback="./fallback.svg"
+        className="h-full flex-1 blur-md"
       />
-      <div
-        className="h-full flex-1 bg-cover blur-md"
-        style={{ backgroundImage }}
+      <Image
+        src={imageUrl}
+        fallback="./fallback.svg"
+        className="h-full flex-1 blur-md"
       />
       <div className="absolute inset-0 size-full bg-black/25" />
-      <div
-        className="absolute left-1/2 h-full w-60 -translate-x-1/2 bg-cover"
-        style={{ backgroundImage }}
+      <Image
+        src={imageUrl}
+        fallback="./fallback.svg"
+        className="absolute left-1/2 h-full w-60 -translate-x-1/2"
       />
     </div>
   )

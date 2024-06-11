@@ -1,4 +1,5 @@
 import { ChildrenProp, ClassNameProp } from "~/components/base/BaseProps"
+import { Image } from "~/components/Image"
 import { cn } from "~/utils/cn"
 import { surface } from "~/utils/styles"
 
@@ -20,10 +21,15 @@ interface HeroProps extends ChildrenProp {
 }
 const Hero = ({ title, subtitle, imageUrl, children }: HeroProps) => (
   <div
-    className="text-text-priority relative h-32 w-full bg-cover"
+    className="text-text-priority relative isolate h-32 w-full bg-cover"
     style={{ backgroundImage: imageUrl ? `url(${imageUrl})` : undefined }}
   >
-    <h2 className="grid size-full place-content-center bg-black/60 p-2 text-center">
+    <Image
+      src={imageUrl}
+      fallback="./fallback.svg"
+      className="absolute inset-0 size-full"
+    />
+    <h2 className="relative z-10 grid size-full place-content-center bg-black/60 p-2 text-center">
       <span className="truncate text-lg font-bold">{title}</span>
       {subtitle && (
         <span className="text-text-highlight line-clamp-2 text-sm font-bold">
