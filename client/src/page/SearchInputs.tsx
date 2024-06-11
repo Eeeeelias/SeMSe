@@ -277,7 +277,7 @@ export const SearchInputs = ({ onSubmit }: SearchSubmitProp) => (
       className={cn(
         surface({ rounded: "lg" }),
         hstack({ gap: 4 }),
-        "mx-auto w-fit flex-col p-4 md:flex-row"
+        "mobile:flex-col mx-auto w-fit p-4"
       )}
     >
       <p className={"pt-2"}>Filters:</p>

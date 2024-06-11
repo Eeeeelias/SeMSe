@@ -4,6 +4,7 @@ import { Config } from "tailwindcss"
 import { fontFamily } from "tailwindcss/defaultTheme"
 
 import { bgLayerPlugin } from "./bgLayerPlugin"
+import { screens } from "./breakpoints"
 import { colors } from "./colors"
 import { shadowPlugin } from "./shadowPlugin"
 
@@ -15,6 +16,7 @@ export default {
       body: ["Quicksand", ...fontFamily.sans],
       mono: ["Fira Code", ...fontFamily.mono],
     },
+    screens,
     colors,
 
     // Remove default box shadows

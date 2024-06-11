@@ -1,35 +1,23 @@
 import { createAtom } from "~/data/yaasl"
 
-const BREAKPOINTS = {
-  mobile: 550,
-  tablet: 1100,
-  laptop: 1500,
-  desktop: 9999,
-}
+import { breakpoints } from "../../tailwind/breakpoints"
 
-type BreakpointName = keyof typeof BREAKPOINTS
+type BreakpointName = keyof typeof breakpoints
 
 const getBreakpoint = () => {
   const { innerWidth } = window
-  const match = Object.entries(BREAKPOINTS)
+  const match = Object.entries(breakpoints)
     .sort((a, b) => a[1] - b[1])
     .find(breakpoint => innerWidth < breakpoint[1]) ?? [
     "desktop",
-    BREAKPOINTS.desktop,
+    breakpoints.desktop,
   ]
-
-  /*
-  return {
-    name: match[0] as BreakpointName,
-    value: match[1],
-  }
-  */
 
   return {
     current: match[0] as BreakpointName,
-    isMobile: innerWidth <= BREAKPOINTS.mobile,
-    isTablet: innerWidth <= BREAKPOINTS.tablet,
-    isLaptop: innerWidth <= BREAKPOINTS.laptop,
+    isMobile: innerWidth <= breakpoints.mobile,
+    isTablet: innerWidth <= breakpoints.tablet,
+    isLaptop: innerWidth <= breakpoints.laptop,
     isDesktop: true,
   }
 }
