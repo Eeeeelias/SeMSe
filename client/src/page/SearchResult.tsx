@@ -1,3 +1,4 @@
+import { useAtomValue } from "@yaasl/preact"
 import { useState } from "preact/hooks"
 
 import { Icon } from "~/components/base/Icon"
@@ -5,6 +6,7 @@ import { Button } from "~/components/Button"
 import { Card } from "~/components/Card"
 import { Modal } from "~/components/Modal"
 import { RangeMeter } from "~/components/RangeMeter"
+import { breakpoint } from "~/data/breakpoint"
 import { OpenAPI, QueryResult } from "~/generated-api"
 
 const getId = (result: QueryResult[number]) =>
@@ -102,6 +104,38 @@ const MatchDetails = ({
   )
 }
 
+const ModalImage = ({ imageId }: Pick<QueryResult[number], "imageId">) => {
+  const imageUrl = getImage(imageId)
+  const backgroundImage = imageUrl ? `url(${imageUrl})` : undefined
+
+  const { isMobile } = useAtomValue(breakpoint)
+  if (isMobile)
+    return (
+      <div className="relative flex h-32 w-full overflow-hidden rounded-t-lg">
+        <div
+          className="h-full flex-1 bg-cover blur-md"
+          style={{ backgroundImage }}
+        />
+        <div
+          className="h-full flex-1 bg-cover blur-md"
+          style={{ backgroundImage }}
+        />
+        <div className="absolute inset-0 size-full bg-black/25" />
+        <div
+          className="absolute left-1/2 h-full w-60 -translate-x-1/2 bg-cover"
+          style={{ backgroundImage }}
+        />
+      </div>
+    )
+
+  return (
+    <div
+      className="h-32 w-60 shrink-0 rounded-br-lg rounded-tl-lg bg-cover"
+      style={{ backgroundImage }}
+    />
+  )
+}
+
 const InfoModal = ({
   episodeId,
   episodeTitle,
@@ -113,19 +147,13 @@ const InfoModal = ({
   timestamp,
   type,
 }: QueryResult[number]) => {
-  const imageUrl = getImage(imageId)
   return (
-    <div className="w-[calc(100vw-2rem)] max-w-prose">
-      <div className="flex">
-        <div
-          className="h-32 w-60 shrink-0 rounded-br-lg rounded-tl-lg bg-cover"
-          style={{
-            backgroundImage: imageUrl ? `url(${imageUrl})` : undefined,
-          }}
-        />
+    <div className="w-[calc(100vw-3rem)] max-w-prose">
+      <div className="mobile:flex-col flex">
+        <ModalImage imageId={imageId} />
         <div className="flex-1 px-4 pt-2">
           <h2 className="mr-10 text-lg font-bold">{title}</h2>
-          <span className="text-text-gentle line-clamp-2 text-sm font-bold">
+          <span className="text-text-gentle text-sm font-bold">
             {[episodeId, episodeTitle].filter(Boolean).join(" - ")}
           </span>
           <div className="pt-1" />
