@@ -5,8 +5,8 @@ import { Loading } from "./components/Loading"
 import { NoData } from "./components/NoData"
 import { showToast } from "./components/Toaster"
 import { PostQueryData, QueryResult, postQuery } from "./generated-api"
+import { Results } from "./page/results/Results"
 import { FiltersState, SearchInputs } from "./page/SearchInputs"
-import { SearchResult } from "./page/SearchResult"
 import { SizeKpis } from "./page/SizeKpis"
 import * as patterns from "./utils/patterns"
 
@@ -94,7 +94,7 @@ export const App = () => {
 
       {results && !noData && (
         <div className="mx-auto my-10 max-w-6xl">
-          <SearchResult results={results} />
+          <Results results={results} />
         </div>
       )}
     </div>
