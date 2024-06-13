@@ -10,22 +10,15 @@ import { NumberInput } from "~/components/inputs/NumberInput"
 import { Select } from "~/components/inputs/Select"
 import { TextInput } from "~/components/inputs/TextInput"
 import { MenuButton } from "~/components/MenuButton"
+import { QueryRequestBody } from "~/data/api/fetchQuery"
 import { cn } from "~/utils/cn"
 import { hstack, surface } from "~/utils/styles"
 
-export interface FiltersState {
-  query: string
-  table: string
-  show?: string
-  language?: string
-  type?: string
-  season?: string
-}
 const Context = createContext<null | {
-  filters: FiltersState
-  setFilter: <K extends keyof FiltersState>(
+  filters: QueryRequestBody
+  setFilter: <K extends keyof QueryRequestBody>(
     key: K
-  ) => (value: FiltersState[K]) => void
+  ) => (value: QueryRequestBody[K]) => void
 }>(null)
 
 const useFilters = () => {
@@ -37,18 +30,18 @@ const useFilters = () => {
 }
 
 const FilterProvider = ({ children }: ChildrenProp) => {
-  const [filters, setFilters] = useState<FiltersState>({
+  const [filters, setFilters] = useState<QueryRequestBody>({
     query: "",
     table: "",
   })
 
   const setFilter =
-    <K extends keyof FiltersState>(key: K) =>
-    (value: FiltersState[K]) => {
+    <K extends keyof QueryRequestBody>(key: K) =>
+    (value: QueryRequestBody[K]) => {
       setFilters(prev => {
         if (value === undefined) {
           const { [key]: _, ...rest } = prev
-          return rest as FiltersState
+          return rest as QueryRequestBody
         }
         return { ...prev, [key]: value }
       })
@@ -202,7 +195,7 @@ const SearchButton = ({ onSubmit }: SearchSubmitProp) => {
   const { filters } = useFilters()
 
   const isValid = getRequiredInputs().every(
-    ({ value }) => !!filters[value as keyof FiltersState]
+    ({ value }) => !!filters[value as keyof QueryRequestBody]
   )
 
   return (
@@ -233,7 +226,7 @@ export const FilterInputs = () => {
   }
   const removeFilter = (value: string) => {
     setSelected(prev => prev.filter(v => v !== value))
-    setFilter(value as keyof FiltersState)(undefined)
+    setFilter(value as keyof QueryRequestBody)(undefined)
   }
 
   return (
@@ -269,7 +262,7 @@ export const FilterInputs = () => {
 }
 
 interface SearchSubmitProp {
-  onSubmit: Dispatch<FiltersState>
+  onSubmit: Dispatch<QueryRequestBody>
 }
 export const SearchInputs = ({ onSubmit }: SearchSubmitProp) => (
   <FilterProvider>

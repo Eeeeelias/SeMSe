@@ -4,9 +4,13 @@ import { useState } from "preact/hooks"
 import { Loading } from "./components/Loading"
 import { NoData } from "./components/NoData"
 import { showToast } from "./components/Toaster"
-import { PostQueryData, QueryResult, postQuery } from "./generated-api"
+import {
+  CombinedQueryResult,
+  fetchQuery,
+  QueryRequestBody,
+} from "./data/api/fetchQuery"
 import { Results } from "./page/results/Results"
-import { FiltersState, SearchInputs } from "./page/SearchInputs"
+import { SearchInputs } from "./page/SearchInputs"
 import { SizeKpis } from "./page/SizeKpis"
 import * as patterns from "./utils/patterns"
 
@@ -20,13 +24,13 @@ glob`
 
 const getNoDataMessage = (
   state: "init" | "idle" | "pending",
-  result: QueryResult | null
+  result: CombinedQueryResult | null
 ) => {
   switch (state) {
     case "init":
       return "Nothing to see here yet, use the filters to search for some media!"
     case "idle":
-      if (!result || result.length === 0) {
+      if (!result || [...result.llm, ...result.plain].length === 0) {
         return "No results found."
       }
   }
@@ -35,17 +39,12 @@ const getNoDataMessage = (
 
 export const App = () => {
   const [state, setState] = useState<"init" | "pending" | "idle">("init")
-  const [results, setResults] = useState<QueryResult | null>(null)
+  const [results, setResults] = useState<CombinedQueryResult | null>(null)
 
-  const sendQuery = (filters: FiltersState) => {
-    const requestBody: PostQueryData["requestBody"] = {
-      ...filters,
-      type: (filters.type ?? "both") as "both",
-    }
-
+  const sendQuery = (filters: QueryRequestBody) => {
     setState("pending")
     setResults(null)
-    postQuery({ requestBody })
+    fetchQuery(filters)
       .then(setResults)
       .catch(error => {
         showToast({
@@ -93,7 +92,7 @@ export const App = () => {
       )}
 
       {results && !noData && (
-        <div className="mx-auto my-10 max-w-6xl">
+        <div className="mx-auto mt-10 max-w-6xl pb-10">
           <Results results={results} />
         </div>
       )}

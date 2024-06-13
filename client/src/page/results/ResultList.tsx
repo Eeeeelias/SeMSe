@@ -57,13 +57,13 @@ const MatchCard = ({
 }
 
 interface MatchListProps {
-  results: QueryResult
+  matches: QueryResult
   onOpenDetails: Dispatch<QueryResult[number]>
 }
 
-export const ResultList = ({ results, onOpenDetails }: MatchListProps) => (
+export const ResultList = ({ matches, onOpenDetails }: MatchListProps) => (
   <div className="grid grid-cols-[repeat(auto-fit,minmax(theme(width.60),1fr))] justify-center gap-4">
-    {results.map(result => (
+    {matches.map(result => (
       <MatchCard
         key={getId(result)}
         {...result}
