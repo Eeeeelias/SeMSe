@@ -15,6 +15,7 @@ export interface QueryRequestBody {
 }
 
 export interface CombinedQueryResult {
+  query: string
   llm: QueryResult
   plain: QueryResult
 }
@@ -30,5 +31,5 @@ export const fetchQuery = (
   return Promise.all([
     postQuery({ requestBody }),
     postPlainQuery({ requestBody }),
-  ]).then(([llm, plain]) => ({ llm, plain }))
+  ]).then(([llm, plain]) => ({ llm, plain, query: filters.query }))
 }

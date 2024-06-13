@@ -6,24 +6,9 @@ import { RangeMeter } from "~/components/RangeMeter"
 import { breakpoint } from "~/data/breakpoint"
 import { QueryResult } from "~/generated-api"
 
+import { Highlighted } from "./Highlighted"
 import { formatTimeStamp } from "./utils/formatTimeStamp"
 import { getImageUrl } from "./utils/getImageUrl"
-
-const Description = ({
-  exactMatch,
-  text = "",
-}: Pick<QueryResult[number], "exactMatch" | "text">) => {
-  const [trailing, leading] = !exactMatch ? [text] : text.split(exactMatch)
-  if (!leading || !exactMatch) return <>{text}</>
-
-  return (
-    <>
-      <span className="text-text-gentle">{trailing}</span>
-      <span className="text-text-highlight">{exactMatch}</span>
-      <span className="text-text-gentle">{leading}</span>
-    </>
-  )
-}
 
 const MatchDetails = ({
   timestamp,
@@ -79,15 +64,19 @@ const ModalImage = ({ imageId }: Pick<QueryResult[number], "imageId">) => {
 interface DetailsModalProps {
   onClose: () => void
   selected: QueryResult[number]
+  highlight: string
 }
-export const DetailsModal = ({ selected, onClose }: DetailsModalProps) => {
+export const DetailsModal = ({
+  highlight,
+  selected,
+  onClose,
+}: DetailsModalProps) => {
   const {
     episodeId,
     episodeTitle,
     imageId,
     title,
     text,
-    exactMatch,
     progress,
     timestamp,
     type,
@@ -111,7 +100,7 @@ export const DetailsModal = ({ selected, onClose }: DetailsModalProps) => {
           </div>
         </div>
         <div className="max-h-96 overflow-auto p-4">
-          <Description exactMatch={exactMatch} text={text} />
+          <Highlighted text={text} highlight={highlight} />
         </div>
       </div>
     </Modal.Root>
