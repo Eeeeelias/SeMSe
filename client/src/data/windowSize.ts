@@ -1,4 +1,5 @@
 import { createAtom } from "~/data/yaasl"
+import { createDebounce } from "~/utils/createDebounce"
 
 const pxToRem = (px: number) =>
   px / parseFloat(window.getComputedStyle(document.documentElement).fontSize)
@@ -14,6 +15,8 @@ export const windowSize = createAtom({
   defaultValue: getSize(),
 })
 
+const debounce = createDebounce(25)
+
 window.addEventListener("resize", () => {
-  windowSize.set(getSize())
+  debounce(() => windowSize.set(getSize()))
 })
