@@ -1,9 +1,16 @@
+import { createSelector, useAtomValue } from "@yaasl/preact"
 import { useState, Dispatch } from "preact/hooks"
 
 import { Icon } from "~/components/base/Icon"
+import { windowSize } from "~/data/windowSize"
 import { QueryResult } from "~/generated-api"
+import { clamp } from "~/utils/clamp"
 
 import { MatchCard } from "./MatchCard"
+
+const visibleItems = createSelector([windowSize], size =>
+  clamp(Math.floor(size.rem.width / 17), 2, 4)
+)
 
 const getId = (result: QueryResult[number]) =>
   (result.title ?? "") + (result.episodeId ?? "") + (result.timestamp ?? "")
@@ -21,9 +28,11 @@ export const ResultList = ({
   matches,
   onOpenDetails,
 }: MatchListProps) => {
-  const expandable = matches.length > 4
+  const visible = useAtomValue(visibleItems)
+
+  const expandable = matches.length > visible
   const [expanded, setExpanded] = useState(false)
-  const displayedMatches = expanded ? matches : matches.slice(0, 4)
+  const displayedMatches = expanded ? matches : matches.slice(0, visible)
 
   const headline = (
     <h2 className="text-xl font-bold">

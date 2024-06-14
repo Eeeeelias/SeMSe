@@ -1,35 +1,24 @@
-import { createAtom } from "~/data/yaasl"
+import { createSelector } from "~/data/yaasl"
 
+import { windowSize } from "./windowSize"
 import { breakpoints } from "../../tailwind/breakpoints"
 
 type BreakpointName = keyof typeof breakpoints
 
-const getBreakpoint = () => {
-  const { innerWidth } = window
+export const breakpoint = createSelector([windowSize], size => {
+  const { width } = size.px
   const match = Object.entries(breakpoints)
     .sort((a, b) => a[1] - b[1])
-    .find(breakpoint => innerWidth < breakpoint[1]) ?? [
+    .find(breakpoint => width < breakpoint[1]) ?? [
     "desktop",
     breakpoints.desktop,
   ]
 
   return {
     current: match[0] as BreakpointName,
-    isMobile: innerWidth <= breakpoints.mobile,
-    isTablet: innerWidth <= breakpoints.tablet,
-    isLaptop: innerWidth <= breakpoints.laptop,
+    isMobile: width <= breakpoints.mobile,
+    isTablet: width <= breakpoints.tablet,
+    isLaptop: width <= breakpoints.laptop,
     isDesktop: true,
   }
-}
-
-export const breakpoint = createAtom({
-  name: "breakpoint",
-  defaultValue: getBreakpoint(),
-})
-
-window.addEventListener("resize", () => {
-  const prev = breakpoint.get()
-  const current = getBreakpoint()
-  if (current.current === prev.current) return
-  breakpoint.set(getBreakpoint())
 })
