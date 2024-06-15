@@ -1,3 +1,4 @@
+import { showToast } from "~/components/Toaster"
 import {
   PostQueryData,
   postQuery,
@@ -22,7 +23,7 @@ export interface CombinedQueryResult {
 
 export const fetchQuery = (
   filters: QueryRequestBody
-): Promise<CombinedQueryResult> => {
+): Promise<CombinedQueryResult | null> => {
   const requestBody: PostQueryData["requestBody"] = {
     ...filters,
     type: (filters.type ?? "both") as "both",
@@ -31,5 +32,14 @@ export const fetchQuery = (
   return Promise.all([
     postQuery({ requestBody }),
     postPlainQuery({ requestBody }),
-  ]).then(([llm, plain]) => ({ llm, plain, query: filters.query }))
+  ])
+    .then(([llm, plain]) => ({ llm, plain, query: filters.query }))
+    .catch(error => {
+      showToast({
+        kind: "error",
+        title: "Could not send query",
+        message: String(error),
+      })
+      return null
+    })
 }

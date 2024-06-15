@@ -3,7 +3,6 @@ import { useState } from "preact/hooks"
 
 import { Loading } from "./components/Loading"
 import { NoData } from "./components/NoData"
-import { showToast } from "./components/Toaster"
 import {
   CombinedQueryResult,
   fetchQuery,
@@ -46,13 +45,6 @@ export const App = () => {
     setResults(null)
     fetchQuery(filters)
       .then(setResults)
-      .catch(error => {
-        showToast({
-          kind: "error",
-          title: "Error occured!",
-          message: String(error),
-        })
-      })
       .finally(() => setState("idle"))
   }
 

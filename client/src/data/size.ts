@@ -1,3 +1,4 @@
+import { showToast } from "~/components/Toaster"
 import { getSize, Size } from "~/generated-api"
 
 import { fetchAtom } from "./utils/fetchAtom"
@@ -10,7 +11,15 @@ const mockedSize: Size = {
   subtitles: 0,
 }
 
-const loadSize = async () => getSize().catch(() => mockedSize)
+const loadSize = async () =>
+  getSize().catch(error => {
+    showToast({
+      kind: "error",
+      title: "Could not load counters",
+      message: String(error),
+    })
+    return mockedSize
+  })
 
 export const sizeAtom = fetchAtom<Size | null>({
   name: "size",
