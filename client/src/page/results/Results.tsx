@@ -27,6 +27,7 @@ export const Results = ({ results }: ResultsProps) => {
           }
         />
       )}
+      <div className="col-span-full" />
       {results.llm.length > 0 && (
         <ResultList
           title="Semantic search"

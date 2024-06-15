@@ -49,13 +49,13 @@ export const ResultList = ({
         {expandable ? (
           <button
             onClick={() => setExpanded(state => !state)}
-            className="bgl-base-transparent hover:bgl-layer-w/5 focus-visible:bgl-layer-w/5 active:bgl-layer-w/10 mb-2 mt-6 flex items-center gap-2 rounded px-3 py-2"
+            className="bgl-base-transparent hover:bgl-layer-w/5 focus-visible:bgl-layer-w/5 active:bgl-layer-w/10 flex items-center gap-2 rounded px-3 py-2"
           >
             <Icon icon={expanded ? "caret-down" : "caret-right"} />
             {headline}
           </button>
         ) : (
-          <div className="mb-4 mt-8">{headline}</div>
+          <div className="py-2">{headline}</div>
         )}
       </div>
       {displayedMatches.map(result => (
