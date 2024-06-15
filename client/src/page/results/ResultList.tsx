@@ -1,10 +1,11 @@
 import { createSelector, useAtomValue } from "@yaasl/preact"
-import { useState, Dispatch } from "preact/hooks"
+import { useState, Dispatch, useRef } from "preact/hooks"
 
 import { ChildrenProp } from "~/components/base/BaseProps"
 import { Icon } from "~/components/base/Icon"
 import { windowSize } from "~/data/windowSize"
 import { QueryResult } from "~/generated-api"
+import { useDebounce } from "~/hooks/useDebounce"
 import { clamp } from "~/utils/clamp"
 
 import { MatchCard } from "./MatchCard"
@@ -70,8 +71,25 @@ export const ResultList = ({
   )
 }
 
-export const ResultGrid = ({ children }: ChildrenProp) => (
-  <div className="grid grid-cols-[repeat(auto-fit,minmax(theme(width.60),1fr))] justify-center gap-4">
-    {children}
-  </div>
-)
+export const ResultGrid = ({ children }: ChildrenProp) => {
+  const debounce = useDebounce(10) // scroll must be debounced since the ref of the first render is lost
+  const didScroll = useRef(false)
+
+  const scrollIntoView = (ref: HTMLElement | null) => {
+    const headline = ref?.querySelector("h2")?.parentElement
+    if (!headline || didScroll.current) return
+    debounce(() => {
+      didScroll.current = true
+      headline.scrollIntoView({ behavior: "smooth", block: "start" })
+    })
+  }
+
+  return (
+    <div
+      ref={scrollIntoView}
+      className="grid scroll-m-4 grid-cols-[repeat(auto-fit,minmax(theme(width.60),1fr))] justify-center gap-4"
+    >
+      {children}
+    </div>
+  )
+}
