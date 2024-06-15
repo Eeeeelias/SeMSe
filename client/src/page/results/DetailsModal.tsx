@@ -2,6 +2,7 @@ import { useAtomValue } from "@yaasl/preact"
 
 import { Image } from "~/components/Image"
 import { Modal } from "~/components/Modal"
+import { Quote } from "~/components/Quote"
 import { RangeMeter } from "~/components/RangeMeter"
 import { breakpoint } from "~/data/breakpoint"
 import { QueryResult } from "~/generated-api"
@@ -100,7 +101,13 @@ export const DetailsModal = ({
           </div>
         </div>
         <div className="max-h-96 overflow-auto p-4">
-          <Highlighted text={text} highlight={highlight} />
+          {type === "description" ? (
+            <Highlighted text={text} highlight={highlight} />
+          ) : (
+            <Quote>
+              <Highlighted text={text} highlight={highlight} />
+            </Quote>
+          )}
         </div>
       </div>
     </Modal.Root>

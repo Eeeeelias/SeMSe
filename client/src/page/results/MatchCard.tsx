@@ -53,7 +53,6 @@ export const MatchCard = ({
           <Highlighted text={text} highlight={highlight} />
         </Card.Text>
       ) : (
-        // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing
         <Card.Quote>
           <Highlighted text={exactMatch || text} highlight={highlight} />
         </Card.Quote>
