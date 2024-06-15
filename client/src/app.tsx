@@ -59,8 +59,8 @@ export const App = () => {
   const noData = getNoDataMessage(state, results)
 
   return (
-    <div className="m-auto max-w-[100vw] px-4">
-      <div className="mb-20 pt-20 text-center">
+    <div className="m-auto max-w-[100vw] px-4 py-20">
+      <div className="mb-20 text-center">
         <h1 className="text-text-gentle text-8xl font-bold">SeMSe</h1>
         <b className="text-text-gentle/50">Se[mantic]M[edia]Se[arch]</b>
       </div>
@@ -80,19 +80,19 @@ export const App = () => {
       </div>
 
       {state === "pending" && (
-        <div className="mx-auto my-20">
+        <div className="mx-auto mt-20">
           <Loading size="lg" />
         </div>
       )}
 
       {noData && (
-        <div className="mx-auto my-20 w-max">
+        <div className="mx-auto mt-20 w-max">
           <NoData label={noData} />
         </div>
       )}
 
       {results && !noData && (
-        <div className="mx-auto mt-10 max-w-6xl pb-10">
+        <div className="mx-auto mt-10 max-w-6xl">
           <Results results={results} />
         </div>
       )}
