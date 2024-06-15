@@ -4,7 +4,7 @@ import { CombinedQueryResult } from "~/data/api/fetchQuery"
 import { QueryResult } from "~/generated-api"
 
 import { DetailsModal } from "./DetailsModal"
-import { ResultList } from "./ResultList"
+import { ResultGrid, ResultList } from "./ResultList"
 
 interface ResultsProps {
   results: CombinedQueryResult
@@ -16,7 +16,7 @@ export const Results = ({ results }: ResultsProps) => {
     data: QueryResult[number]
   } | null>(null)
   return (
-    <>
+    <ResultGrid>
       {results.plain.length > 0 && (
         <ResultList
           title="Text search"
@@ -43,6 +43,6 @@ export const Results = ({ results }: ResultsProps) => {
           onClose={() => setSelected(null)}
         />
       )}
-    </>
+    </ResultGrid>
   )
 }
