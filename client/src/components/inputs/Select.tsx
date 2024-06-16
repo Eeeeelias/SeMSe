@@ -7,40 +7,43 @@ import { FocusHandlerProps } from "../base/BaseProps"
 import { Icon } from "../base/Icon"
 import { Dropdown } from "../dropdown/Dropdown"
 
-interface SelectTriggerProps extends FocusHandlerProps {
-  placeholder: string
-  value?: string
-  open?: boolean
-}
-const SelectTrigger = ({
-  placeholder,
-  value,
-  open,
-  ...delegated
-}: SelectTriggerProps) => (
-  <Dropdown.Trigger>
-    <button
-      {...delegated}
-      kind="flat"
-      className={cn(
-        "-ml-3 h-full min-w-[5ch] pl-3 text-start outline-none",
-        !value ? "text-text-gentle/50" : "text-text-priority"
-      )}
-    >
-      {/* eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing */}
-      {value || placeholder}
-      {open ? (
-        <Icon icon="caret-down" className="text-text ml-2" />
-      ) : (
-        <Icon icon="caret-up" className="text-text mb-1 ml-2" />
-      )}
-    </button>
-  </Dropdown.Trigger>
-)
-
 interface Option {
   value: string
   label: string
+}
+
+interface SelectTriggerProps extends FocusHandlerProps {
+  placeholder: string
+  open?: boolean
+  currentOption?: Option
+}
+const SelectTrigger = ({
+  placeholder,
+  currentOption,
+  open,
+  ...delegated
+}: SelectTriggerProps) => {
+  const { label, value } = currentOption ?? {}
+  return (
+    <Dropdown.Trigger>
+      <button
+        {...delegated}
+        kind="flat"
+        className={cn(
+          "-ml-3 h-full min-w-[5ch] pl-3 text-start outline-none",
+          !value ? "text-text-gentle/50" : "text-text-priority"
+        )}
+      >
+        {/* eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing */}
+        {label || placeholder}
+        {open ? (
+          <Icon icon="caret-down" className="text-text ml-2" />
+        ) : (
+          <Icon icon="caret-up" className="text-text mb-1 ml-2" />
+        )}
+      </button>
+    </Dropdown.Trigger>
+  )
 }
 
 const SelectDropdown = ({
@@ -53,7 +56,7 @@ const SelectDropdown = ({
   <Dropdown.Close>
     <Dropdown.Menu>
       {options.map(({ value, label }) => (
-        <Dropdown.MenuItem key={value} onClick={() => onSelect?.(label)}>
+        <Dropdown.MenuItem key={value} onClick={() => onSelect?.(value)}>
           {label}
         </Dropdown.MenuItem>
       ))}
@@ -78,9 +81,11 @@ export const Select = ({
   action,
   alert,
   label,
+  value,
   ...delegated
 }: SelectProps) => {
   const [open, setOpen] = useState(false)
+  const currentOption = options.find(option => option.value === value)
   return (
     <Decorator.Border action={action} alert={alert}>
       <Decorator.Label
@@ -94,7 +99,12 @@ export const Select = ({
           open={open}
           onOpenChange={setOpen}
         >
-          <SelectTrigger {...delegated} open={open} placeholder={placeholder} />
+          <SelectTrigger
+            {...delegated}
+            currentOption={currentOption}
+            open={open}
+            placeholder={placeholder}
+          />
           <SelectDropdown options={options} onSelect={onChange} />
         </Dropdown.Root>
       </Decorator.Label>
