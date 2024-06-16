@@ -7,6 +7,7 @@ import {
   useInteractions,
   Side,
   useListNavigation,
+  useFocus,
 } from "@floating-ui/react"
 import { useMemo, useRef, useState } from "preact/hooks"
 
@@ -30,6 +31,7 @@ const getArrowMiddleware = ({ arrowRef }: MiddlewareOptions) => [
 
 interface Interactions {
   click?: boolean
+  focus?: boolean
   navigation?:
     | { loop: boolean; openOnArrowKeyDown: boolean; enabled: boolean }
     | boolean
@@ -43,6 +45,7 @@ export interface DropdownOptions extends Omit<FloatingOptions, "middleware"> {
 const getInteractions = ({ navigation, ...props }: Interactions) =>
   ({
     click: true,
+    focus: false,
     dismiss: true,
     role: "menu",
     navigation: {
@@ -72,6 +75,9 @@ export const useDropdown = ({
   const click = useClick(floating.context, {
     enabled: features.click,
   })
+  const focus = useFocus(floating.context, {
+    enabled: features.focus,
+  })
   const navigation = useListNavigation(floating.context, {
     activeIndex,
     onNavigate: setActiveIndex,
@@ -85,7 +91,13 @@ export const useDropdown = ({
     role: features.role,
   })
 
-  const interactionProps = useInteractions([click, navigation, dismiss, role])
+  const interactionProps = useInteractions([
+    click,
+    focus,
+    navigation,
+    dismiss,
+    role,
+  ])
   const itemRole: "menuitem" | "option" =
     features.role === "menu" ? "menuitem" : "option"
 

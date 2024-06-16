@@ -127,10 +127,15 @@ const Menu = forwardRef<HTMLDivElement, HTMLAttributes<HTMLDivElement>>(
 
     return (
       <FloatingPortal>
-        <FloatingFocusManager context={floatingContext} modal={context.modal}>
+        <FloatingFocusManager
+          context={floatingContext}
+          modal={context.modal}
+          returnFocus
+        >
           <FloatingList elementsRef={context.elementsRef}>
             <div
               ref={ref}
+              className="outline-none"
               style={{
                 ...context.floatingStyles,
                 ...(typeof style === "object" ? style : {}),
