@@ -1,6 +1,7 @@
 import { createContext, JSX } from "preact"
 
-import { Dispatch, useContext, useState } from "preact/hooks"
+import { useAtomValue } from "@yaasl/preact"
+import { Dispatch, useContext, useMemo, useState } from "preact/hooks"
 
 import { ChildrenProp } from "~/components/base/BaseProps"
 import { Icon } from "~/components/base/Icon"
@@ -11,6 +12,8 @@ import { Select } from "~/components/inputs/Select"
 import { TextInput } from "~/components/inputs/TextInput"
 import { MenuButton } from "~/components/MenuButton"
 import { QueryRequestBody } from "~/data/api/fetchQuery"
+import { mediaAtom } from "~/data/media"
+import { Media } from "~/generated-api"
 import { cn } from "~/utils/cn"
 import { hstack, surface } from "~/utils/styles"
 
@@ -90,11 +93,25 @@ const TableInput = (props: InputProps) => {
 
 const TitleInput = (props: InputProps) => {
   const { filters, setFilter } = useFilters()
+  const media = useAtomValue(mediaAtom)
+
+  const options = useMemo(
+    () =>
+      media?.[filters.table as keyof Media]?.map(({ name }) => ({
+        label: String(name),
+        value: String(name),
+      })) ?? [],
+    [filters.table, media]
+  )
+
   return (
-    <TextInput
+    <Select
+      key={filters.type}
       placeholder="The Office"
       value={filters.show}
       onChange={setFilter("show")}
+      options={options}
+      searchable
       {...props}
     />
   )
