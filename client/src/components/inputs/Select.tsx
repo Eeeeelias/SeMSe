@@ -69,18 +69,37 @@ const useOptions = ({
   return filtered.sort((a, b) => a.label.localeCompare(b.label))
 }
 
-const SelectOptions = ({
+const PlainOptions = ({
   options,
   onSelect,
-  searchable,
 }: {
   options: Option[]
   onSelect?: Dispatch<string>
-  searchable?: boolean
+}) =>
+  options.length === 0 ? (
+    <span className="text-text-gentle mx-3">No options</span>
+  ) : (
+    <>
+      {options.map(({ label, value }) => (
+        <Dropdown.Close key={value}>
+          <Dropdown.MenuItem onClick={() => onSelect?.(value)}>
+            {label}
+          </Dropdown.MenuItem>
+        </Dropdown.Close>
+      ))}
+    </>
+  )
+
+const SearchableOptions = ({
+  options,
+  onSelect,
+}: {
+  options: Option[]
+  onSelect?: Dispatch<string>
 }) => {
   const [filter, setFilter] = useState<string>()
-
   const displayedOptions = useOptions({ options, filter })
+
   const menuItems =
     displayedOptions.length === 0 ? (
       <span className="text-text-gentle mx-3">No options</span>
@@ -98,10 +117,6 @@ const SelectOptions = ({
         </Dropdown.Close>
       ))
     )
-
-  if (!searchable) {
-    return <>{menuItems}</>
-  }
 
   return (
     <>
@@ -170,11 +185,11 @@ export const Select = ({
             placeholder={placeholder}
           />
           <Dropdown.Menu>
-            <SelectOptions
-              options={options}
-              onSelect={onChange}
-              searchable={searchable}
-            />
+            {searchable ? (
+              <SearchableOptions options={options} onSelect={onChange} />
+            ) : (
+              <PlainOptions options={options} onSelect={onChange} />
+            )}
           </Dropdown.Menu>
         </Dropdown.Root>
       </Decorator.Label>
