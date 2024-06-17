@@ -18,7 +18,7 @@ import { useMergeRefs } from "~/utils/mergeRefs"
 import { surface, vstack } from "~/utils/styles"
 
 import { useDropdown, DropdownOptions } from "./useDropdown"
-import { ChildrenProp } from "../base/BaseProps"
+import { ChildrenProp, ClassNameProp } from "../base/BaseProps"
 import { Slot } from "../base/Slot"
 import { Button } from "../Button"
 
@@ -160,17 +160,19 @@ const Menu = forwardRef<HTMLDivElement, HTMLAttributes<HTMLDivElement>>(
   }
 )
 
-interface MenuItemProps extends ChildrenProp {
+interface MenuItemProps extends ChildrenProp, ClassNameProp {
   onClick?: () => void
+  style?: JSX.CSSProperties
 }
-const MenuItem = ({ children, onClick }: MenuItemProps) => {
+const MenuItem = ({ children, className, ...delegated }: MenuItemProps) => {
   const { activeIndex, getItemProps, itemRole } = useDropdownContext()
   const { ref, index } = useListItem()
 
   const isActive = activeIndex === index || (activeIndex == null && index === 0)
 
   const props = getItemProps({
-    onClick,
+    ...delegated,
+    className: cn("truncate", className),
     role: itemRole,
     tabIndex: isActive ? 0 : -1,
   })
