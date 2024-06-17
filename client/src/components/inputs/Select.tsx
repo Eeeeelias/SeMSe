@@ -82,7 +82,10 @@ const PlainOptions = ({
     <>
       {options.map(({ label, value }) => (
         <Dropdown.Close key={value}>
-          <Dropdown.MenuItem onClick={() => onSelect?.(value)}>
+          <Dropdown.MenuItem
+            className="block text-start"
+            onClick={() => onSelect?.(value)}
+          >
             {label}
           </Dropdown.MenuItem>
         </Dropdown.Close>
@@ -107,6 +110,7 @@ const SearchableOptions = ({
       displayedOptions.map(({ value, label }) => (
         <Dropdown.Close key={value}>
           <Dropdown.MenuItem
+            className="block text-start"
             onClick={() => {
               setFilter("")
               onSelect?.(value)
