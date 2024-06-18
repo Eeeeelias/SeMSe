@@ -1,5 +1,7 @@
+import { useAtomValue } from "@yaasl/preact"
 import { Dispatch, useState } from "preact/hooks"
 
+import { breakpoint } from "~/data/breakpoint"
 import { useVirtual } from "~/hooks/useVirtual"
 import { cn } from "~/utils/cn"
 import { vstack } from "~/utils/styles"
@@ -8,6 +10,7 @@ import { Action, AlertProps, Decorator } from "./Decorator"
 import { TextField } from "./TextField"
 import { FocusHandlerProps } from "../base/BaseProps"
 import { Icon } from "../base/Icon"
+import { Portal } from "../base/Portal"
 import { Dropdown } from "../dropdown/Dropdown"
 
 interface Option {
@@ -126,7 +129,7 @@ const SearchableOptions = ({
             <Dropdown.MenuItem
               key={key}
               onClick={() => onSelect?.(value)}
-              className="absolute block w-full text-start"
+              className="absolute"
               style={{ top: offsetTop }}
             >
               {label}
@@ -138,7 +141,7 @@ const SearchableOptions = ({
 
   return (
     <>
-      <div className="border-stroke-gentle/50 w-full border-b p-2">
+      <div className="border-stroke-gentle/50 w-60 border-b p-2">
         <TextField
           placeholder="Search options"
           className="border-text-gentle focus:border-stroke-highlight h-10 w-full min-w-full rounded border px-3"
@@ -189,6 +192,8 @@ export const Select = ({
   const [open, setOpen] = useState(false)
   const currentOption = options.find(option => option.value === value)
 
+  const { isMobile } = useAtomValue(breakpoint)
+
   return (
     <Decorator.Border action={action} alert={alert}>
       <Decorator.Label
@@ -208,7 +213,18 @@ export const Select = ({
             open={open}
             placeholder={placeholder}
           />
-          <Dropdown.Menu>
+          {isMobile && open && (
+            <Portal>
+              <div className="fixed inset-0 z-10 size-full bg-black/25 backdrop-blur" />
+            </Portal>
+          )}
+          <Dropdown.Menu
+            style={isMobile ? { transform: "" } : undefined}
+            className={cn(
+              isMobile &&
+                "fixed inset-0 z-20 m-auto size-max items-center justify-center"
+            )}
+          >
             {searchable ? (
               <SearchableOptions options={options} onSelect={onChange} />
             ) : (

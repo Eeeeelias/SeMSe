@@ -172,7 +172,7 @@ const MenuItem = ({ children, className, ...delegated }: MenuItemProps) => {
 
   const props = getItemProps({
     ...delegated,
-    className: cn("truncate", className),
+    className: cn("block w-full truncate text-start", className),
     role: itemRole,
     tabIndex: isActive ? 0 : -1,
   })
