@@ -1,5 +1,6 @@
 import { Dispatch, useState } from "preact/hooks"
 
+import { useVirtual } from "~/hooks/useVirtual"
 import { cn } from "~/utils/cn"
 import { vstack } from "~/utils/styles"
 
@@ -102,24 +103,35 @@ const SearchableOptions = ({
 }) => {
   const [filter, setFilter] = useState<string>()
   const displayedOptions = useOptions({ options, filter })
+  const [scrollElement, setScrollElement] = useState<HTMLDivElement | null>(
+    null
+  )
+  const { items, totalSize } = useVirtual({
+    count: displayedOptions.length,
+    estimateSize: () => 40,
+    getScrollElement: () => scrollElement,
+    overscan: 10,
+  })
 
   const menuItems =
     displayedOptions.length === 0 ? (
       <span className="text-text-gentle mx-3">No options</span>
     ) : (
-      displayedOptions.map(({ value, label }) => (
-        <Dropdown.Close key={value}>
-          <Dropdown.MenuItem
-            className="block text-start"
-            onClick={() => {
-              setFilter("")
-              onSelect?.(value)
-            }}
-          >
-            {label}
-          </Dropdown.MenuItem>
-        </Dropdown.Close>
-      ))
+      items.map(({ key, index, offsetTop }) => {
+        const { label, value } = displayedOptions[index]
+        return (
+          <Dropdown.Close key={key}>
+            <Dropdown.MenuItem
+              key={key}
+              onClick={() => onSelect?.(value)}
+              className="absolute block w-full text-start"
+              style={{ top: offsetTop }}
+            >
+              {label}
+            </Dropdown.MenuItem>
+          </Dropdown.Close>
+        )
+      })
     )
 
   return (
@@ -133,12 +145,18 @@ const SearchableOptions = ({
         />
       </div>
       <div
+        ref={setScrollElement}
         className={cn(
           vstack({ align: "stretch" }),
-          "max-h-64 max-w-64 overflow-auto p-2"
+          "max-h-64 w-60 overflow-y-auto overflow-x-hidden p-2"
         )}
       >
-        {menuItems}
+        <div
+          className="relative"
+          style={{ minHeight: totalSize, height: totalSize }}
+        >
+          {menuItems}
+        </div>
       </div>
     </>
   )
