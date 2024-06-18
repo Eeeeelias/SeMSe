@@ -33,16 +33,18 @@ const SelectTrigger = ({
         {...delegated}
         kind="flat"
         className={cn(
-          "-ml-3 h-full min-w-[5ch] pl-3 text-start outline-none",
+          "-ml-3 inline-flex h-full min-w-[5ch] items-center pl-3 text-start outline-none",
           !value ? "text-text-gentle/50" : "text-text-priority"
         )}
       >
-        {/* eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing */}
-        {label || placeholder}
+        <span className="inline-block max-w-[20ch] truncate">
+          {/* eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing */}
+          {label || placeholder}
+        </span>
         {open ? (
-          <Icon icon="caret-down" className="text-text ml-2" />
+          <Icon icon="caret-down" className="text-text ml-2 mt-1" />
         ) : (
-          <Icon icon="caret-up" className="text-text mb-1 ml-2" />
+          <Icon icon="caret-up" className="text-text ml-2" />
         )}
       </button>
     </Dropdown.Trigger>
